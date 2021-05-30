@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chip", "ChipEmu\Chip.csproj", "{256579CE-1D5B-493A-8309-D69CC239F147}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChipTests", "ChipTests\ChipTests.csproj", "{350949E6-C10D-47CA-858C-0606B6E0B9F1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{256579CE-1D5B-493A-8309-D69CC239F147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{256579CE-1D5B-493A-8309-D69CC239F147}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{256579CE-1D5B-493A-8309-D69CC239F147}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{256579CE-1D5B-493A-8309-D69CC239F147}.Release|Any CPU.Build.0 = Release|Any CPU
+		{350949E6-C10D-47CA-858C-0606B6E0B9F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{350949E6-C10D-47CA-858C-0606B6E0B9F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{350949E6-C10D-47CA-858C-0606B6E0B9F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{350949E6-C10D-47CA-858C-0606B6E0B9F1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A00BE4D1-4787-4FA1-8582-89097DB87F2F}
+	EndGlobalSection
+EndGlobal
