@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Chip
 {
@@ -6,6 +7,7 @@ namespace Chip
 	{
 		private MachineState _state = new();
 		private Processor _processor;
+		private Task _execution;
 
 		public Emulator()
 		{
@@ -19,6 +21,15 @@ namespace Chip
 			//_state.ClearAll();
 			LoadProgram(program);
 
+			if (_execution == null)
+			{
+				_execution = Task.Factory.StartNew(ExecuteProgram);
+			}
+
+		}
+
+		private void ExecuteProgram()
+		{
 			while (_processor.ExecuteNextInstruction()){ }
 		}
 
