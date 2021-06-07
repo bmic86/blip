@@ -11,7 +11,7 @@ namespace Chip
 		internal byte[] Memory { get; private set; } = new byte[Default.MemorySize];
 		internal Registers Registers { get; private set; } = new();
 
-		internal void ClearAll()
+		internal void Clear()
 		{
 			Array.Clear(Memory, 0, Default.MemorySize);
 			Registers.ClearAll();
