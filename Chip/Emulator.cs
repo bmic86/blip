@@ -6,17 +6,11 @@ namespace Chip
 {
 	public class Emulator
 	{
-		private readonly MachineState _state = new();
-		private readonly Processor _processor;
+		private readonly Machine _machine = new();
 		private readonly CancellationTokenSource _taskCancelation = new();
 		private Task _execution;
 
-		public Emulator()
-		{
-			_processor = new(_state);
-		}
-
-		public void Run(byte[] program)
+		public void RunProgram(byte[] program)
 		{
 			_ = program ?? throw new ArgumentNullException(nameof(program));
 
@@ -25,17 +19,8 @@ namespace Chip
 				throw new InvalidOperationException("Emulator is already running.");
 			}
 
-			LoadProgram(program);
-			StartProgram();
+			_execution = Task.Run(() => _machine.ExecuteProgram(program), _taskCancelation.Token);
 		}
-
-		private void ExecuteProgram()
-		{
-			while (_processor.ExecuteNextInstruction()) { }
-		}
-
-		private void LoadProgram(byte[] program) => program.CopyTo(_state.Memory, Default.StartAddress);
-		private void StartProgram() => _execution = Task.Factory.StartNew(ExecuteProgram, _taskCancelation.Token);
 
 	}
 }

@@ -16,7 +16,7 @@ namespace ChipTests
 			// When
 			try
 			{
-				new Emulator().Run(program);
+				new Emulator().RunProgram(program);
 			}
 			// Then
 			catch
@@ -32,24 +32,10 @@ namespace ChipTests
 			byte[] program = null;
 
 			// When
-			void action() => new Emulator().Run(program);
+			void action() => new Emulator().RunProgram(program);
 
 			// Then
 			Assert.ThrowsException<ArgumentNullException>(action);
-		}
-
-		[TestMethod]
-		public void GivenRunningEmulator_WhenTryingToRunAnotherProgram_ThenThrowException()
-		{
-			// Given
-			var emu = new Emulator();
-			emu.Run(new byte[1] { 0x1 });
-
-			// When
-			void action() => emu.Run(new byte[1] { 0x2 });
-
-			// Then
-			Assert.ThrowsException<InvalidOperationException>(action);
 		}
 	}
 }

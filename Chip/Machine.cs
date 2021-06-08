@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace Chip
 {
-	internal class Processor
+	internal class Machine
 	{
-		private readonly MachineState _machineState;
-
-		internal Processor(MachineState machineState)
-		{
-			_machineState = machineState;
-		}
+		private readonly MachineState _state = new();
 
 		public bool ExecuteNextInstruction()
 		{
@@ -25,6 +20,17 @@ namespace Chip
 			throw new NotImplementedException();
 		}
 
+		internal void ExecuteProgram(byte[] program)
+		{
+			LoadProgram(program);
+			Start();
+		}
 
+		private void LoadProgram(byte[] program) => program.CopyTo(_state.Memory, Default.StartAddress);
+
+		private void Start()
+		{
+			while (ExecuteNextInstruction()) { }
+		}
 	}
 }
