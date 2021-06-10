@@ -3,5 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
 
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>ChipTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>
