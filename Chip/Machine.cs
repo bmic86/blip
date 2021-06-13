@@ -3,6 +3,8 @@
 
 	internal class Machine
 	{
+		private const int InstructionSize = 2;
+
 		internal MachineState State { get; private set; } = new();
 
 		private bool isInvalidInstruction = false;
@@ -30,7 +32,7 @@
 			}
 		}
 
-		private bool IsNextInstructionAccessible() => State.Registers.PC + 2 < Default.MemorySize;
+		private bool IsNextInstructionAccessible() => State.Registers.PC + InstructionSize < Default.MemorySize;
 
 		private ushort Execute(int instructionCode)
 		{
@@ -38,8 +40,22 @@
 			return nibbles switch
 			{
 				(0x1000, _, _, _) => (ushort)(instructionCode & 0x0FFF),
+				(0x3000, _, _, _) => SkipNextOnEqual(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
+				(0x4000, _, _, _) => SkipNextOnNotEqual(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
 				_ => InvalidInstruction()
 			};
+		}
+
+		private ushort SkipNextOnEqual(int x, byte nn)
+		{
+			int offset = State.Registers.V[x] == nn ? InstructionSize * 2 : InstructionSize;
+			return (ushort)(State.Registers.PC + offset);
+		}
+
+		private ushort SkipNextOnNotEqual(int x, byte nn)
+		{
+			int offset = State.Registers.V[x] != nn ? InstructionSize * 2 : InstructionSize;
+			return (ushort)(State.Registers.PC + offset);
 		}
 
 		private ushort InvalidInstruction()
