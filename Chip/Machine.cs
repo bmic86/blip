@@ -42,19 +42,26 @@
 				(0x1000, _, _, _) => (ushort)(instructionCode & 0x0FFF),
 				(0x3000, _, _, _) => SkipNextOnEqual(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
 				(0x4000, _, _, _) => SkipNextOnNotEqual(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
+				(0x5000, _, _, 0x0000) => SkipNextOnRegistersEqual(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				_ => InvalidInstruction()
 			};
 		}
 
-		private ushort SkipNextOnEqual(int x, byte nn)
+		private ushort SkipNextOnEqual(int x, byte valueToCompare)
 		{
-			int offset = State.Registers.V[x] == nn ? InstructionSize * 2 : InstructionSize;
+			int offset = State.Registers.V[x] == valueToCompare ? InstructionSize * 2 : InstructionSize;
 			return (ushort)(State.Registers.PC + offset);
 		}
 
-		private ushort SkipNextOnNotEqual(int x, byte nn)
+		private ushort SkipNextOnNotEqual(int x, byte valueToCompare)
 		{
-			int offset = State.Registers.V[x] != nn ? InstructionSize * 2 : InstructionSize;
+			int offset = State.Registers.V[x] != valueToCompare ? InstructionSize * 2 : InstructionSize;
+			return (ushort)(State.Registers.PC + offset);
+		}
+
+		private ushort SkipNextOnRegistersEqual(int x, int y)
+		{
+			int offset = State.Registers.V[x] == State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
 			return (ushort)(State.Registers.PC + offset);
 		}
 
