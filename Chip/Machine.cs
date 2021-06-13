@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Chip
+﻿namespace Chip
 {
 
 	internal class Machine
 	{
 		internal MachineState State { get; private set; } = new();
+
+		private bool isInvalidInstruction = false;
 
 		internal void ExecuteProgram(byte[] program)
 		{
@@ -26,36 +21,37 @@ namespace Chip
 
 		private void Start()
 		{
-			while (IsNextInstructionAccessible())
+			isInvalidInstruction = false;
+			while (!isInvalidInstruction && IsNextInstructionAccessible())
 			{
 				ushort currentPc = State.Registers.PC;
-				State.Registers.PC = Execute(State.Memory[currentPc], State.Memory[currentPc + 1]);
+				int instructionCode = ExtractInstructionCode(State.Memory[currentPc], State.Memory[currentPc + 1]);
+				State.Registers.PC = Execute(instructionCode);
 			}
 		}
 
-		private bool IsNextInstructionAccessible() => State.Registers.PC + 1 < Default.MemorySize;
+		private bool IsNextInstructionAccessible() => State.Registers.PC + 2 < Default.MemorySize;
 
-		private ushort Execute(byte highOrderInstructionByte, byte lowOrderInstructionByte)
+		private ushort Execute(int instructionCode)
 		{
-			var nibbles = ExtractNibbles(highOrderInstructionByte, lowOrderInstructionByte);
+			var nibbles = ExtractNibbles(instructionCode);
 			return nibbles switch
 			{
-				(0x0, _, _, _) => IgnoreInstruction()
+				(0x1000, _, _, _) => (ushort)(instructionCode & 0x0FFF),
+				_ => InvalidInstruction()
 			};
 		}
 
-		private ushort IgnoreInstruction()
+		private ushort InvalidInstruction()
 		{
-			return (ushort)(State.Registers.PC + 2);
+			isInvalidInstruction = true;
+			return State.Registers.PC;
 		}
 
-		private static (byte n1, byte n2, byte n3, byte n4) ExtractNibbles(byte highOrderByte, byte lowOrderByte)
-		{
-			byte n1 = (byte)(highOrderByte & 0xF0 >> 4);
-			byte n2 = (byte)(highOrderByte & 0x0F);
-			byte n3 = (byte)(lowOrderByte & 0xF0 >> 4);
-			byte n4 = (byte)(lowOrderByte & 0x0F);
-			return (n1, n2, n3, n4);
-		}
+		private static int ExtractInstructionCode(byte highOrderInstructionByte, byte lowOrderInstructionByte) =>
+			(highOrderInstructionByte << 8) | lowOrderInstructionByte;
+
+		private static (int n1, int n2, int n3, int n4) ExtractNibbles(int value) =>
+			(n1: value & 0xF000, n2: value & 0x0F00, n3: value & 0x00F0, n4: value & 0x000F);
 	}
 }
