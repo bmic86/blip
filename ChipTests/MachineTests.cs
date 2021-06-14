@@ -45,14 +45,15 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x3D, 0xDD }, 0xD, (byte)0xDD)]
 		[DataRow(new byte[] { 0x3E, 0xEE }, 0xE, (byte)0xEE)]
 		[DataRow(new byte[] { 0x3F, 0xFF }, 0xF, (byte)0xFF)]
-		public void GivenInstruction3XNN_WhenExecuteProgramAndValueOfRegisterVXEqualsToNN_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteProgram_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var machine = new Machine();
 			byte[] program = instruction;
 
-			// When
+			var machine = new Machine();
 			machine.State.Registers.V[x] = value;
+
+			// When
 			machine.ExecuteProgram(program);
 
 			// Then
@@ -76,14 +77,15 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x3D, 0xDD }, 0xD, (byte)0xDF)]
 		[DataRow(new byte[] { 0x3E, 0xEE }, 0xE, (byte)0xF0)]
 		[DataRow(new byte[] { 0x3F, 0xFF }, 0xF, (byte)0xF1)]
-		public void GivenInstruction3XNN_WhenExecuteProgramAndValueOfRegisterVXNotEqualsToNN_ThenDontSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteProgram_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var machine = new Machine();
 			byte[] program = instruction;
 
-			// When
+			var machine = new Machine();
 			machine.State.Registers.V[x] = value;
+
+			// When
 			machine.ExecuteProgram(program);
 
 			// Then
@@ -107,14 +109,15 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x4D, 0xDD }, 0xD, (byte)0xDF)]
 		[DataRow(new byte[] { 0x4E, 0xEE }, 0xE, (byte)0xF0)]
 		[DataRow(new byte[] { 0x4F, 0xFF }, 0xF, (byte)0xF1)]
-		public void GivenInstruction4XNN_WhenExecuteProgramAndValueOfRegisterVXNotEqualsToNN_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteProgram_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var machine = new Machine();
 			byte[] program = instruction;
 
-			// When
+			var machine = new Machine();
 			machine.State.Registers.V[x] = value;
+
+			// When
 			machine.ExecuteProgram(program);
 
 			// Then
@@ -138,14 +141,15 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x4D, 0xDD }, 0xD, (byte)0xDD)]
 		[DataRow(new byte[] { 0x4E, 0xEE }, 0xE, (byte)0xEE)]
 		[DataRow(new byte[] { 0x4F, 0xFF }, 0xF, (byte)0xFF)]
-		public void GivenInstruction4XNN_WhenExecuteProgramAndValueOfRegisterVXEqualsToNN_ThenDontSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteProgram_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var machine = new Machine();
 			byte[] program = instruction;
 
-			// When
+			var machine = new Machine();
 			machine.State.Registers.V[x] = value;
+
+			// When
 			machine.ExecuteProgram(program);
 
 			// Then
@@ -169,15 +173,16 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x5D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0xDD)]
 		[DataRow(new byte[] { 0x5E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0xEE)]
 		[DataRow(new byte[] { 0x5F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0xFF)]
-		public void GivenInstruction5XY0_WhenExecuteProgramAndValueOfRegisterVXEqualsToValueOfRegisterVY_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+		public void GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteProgram_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
-			var machine = new Machine();
 			byte[] program = instruction;
 
-			// When
+			var machine = new Machine();
 			machine.State.Registers.V[x] = vxValue;
 			machine.State.Registers.V[y] = vyValue;
+
+			// When
 			machine.ExecuteProgram(program);
 
 			// Then
@@ -201,15 +206,16 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x5D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0x22)]
 		[DataRow(new byte[] { 0x5E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0x11)]
 		[DataRow(new byte[] { 0x5F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0x00)]
-		public void GivenInstruction5XY0_WhenExecuteProgramAndValueOfRegisterVXNotEqualsToValueOfRegisterVY_ThenDontSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+		public void GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteProgram_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
-			var machine = new Machine();
 			byte[] program = instruction;
 
-			// When
+			var machine = new Machine();
 			machine.State.Registers.V[x] = vxValue;
 			machine.State.Registers.V[y] = vyValue;
+
+			// When
 			machine.ExecuteProgram(program);
 
 			// Then
