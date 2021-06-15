@@ -46,8 +46,29 @@
 				(0x6000, _, _, _) => LoadValueToRegister(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
 				(0x7000, _, _, _) => AddValueToRegister(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
 				(0x8000, _, _, 0x0000) => CopyRegisterVyToRegisterVx(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x0001) => ApplyVxOrVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x0002) => ApplyVxAndVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x0003) => ApplyVxXorVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				_ => InvalidInstruction()
 			};
+		}
+
+		private ushort ApplyVxXorVy(int x, int y)
+		{
+			State.Registers.V[x] ^= State.Registers.V[y];
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
+		private ushort ApplyVxAndVy(int x, int y)
+		{
+			State.Registers.V[x] &= State.Registers.V[y];
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
+		private ushort ApplyVxOrVy(int x, int y)
+		{
+			State.Registers.V[x] |= State.Registers.V[y];
+			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
 		private ushort CopyRegisterVyToRegisterVx(int x, int y)
