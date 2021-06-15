@@ -45,8 +45,15 @@
 				(0x5000, _, _, 0x0000) => SkipNextOnRegistersEqual(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				(0x6000, _, _, _) => LoadValueToRegister(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
 				(0x7000, _, _, _) => AddValueToRegister(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
+				(0x8000, _, _, 0x0000) => CopyRegisterVyToRegisterVx(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				_ => InvalidInstruction()
 			};
+		}
+
+		private ushort CopyRegisterVyToRegisterVx(int x, int y)
+		{
+			State.Registers.V[x] = State.Registers.V[y];
+			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
 		private ushort AddValueToRegister(int x, byte value)
