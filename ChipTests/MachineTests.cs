@@ -415,5 +415,137 @@ namespace ChipTests
 			// Then
 			Assert.AreEqual(initialRegisterXValue ^ initialRegisterYValue, machine.State.Registers.V[x]);
 		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0x80, 0x14 }, 0x0, 0x1, (byte)1, (byte)2)]
+		[DataRow(new byte[] { 0x81, 0xE4 }, 0x1, 0xE, (byte)3, (byte)4)]
+		[DataRow(new byte[] { 0x82, 0xD4 }, 0x2, 0xD, (byte)5, (byte)6)]
+		[DataRow(new byte[] { 0x83, 0xC4 }, 0x3, 0xC, (byte)7, (byte)8)]
+		[DataRow(new byte[] { 0x84, 0xB4 }, 0x4, 0xB, (byte)9, (byte)10)]
+		[DataRow(new byte[] { 0x85, 0xA4 }, 0x5, 0xA, (byte)11, (byte)12)]
+		[DataRow(new byte[] { 0x86, 0x94 }, 0x6, 0x9, (byte)13, (byte)14)]
+		[DataRow(new byte[] { 0x87, 0x84 }, 0x7, 0x8, (byte)15, (byte)16)]
+		[DataRow(new byte[] { 0x88, 0x74 }, 0x8, 0x7, (byte)17, (byte)18)]
+		[DataRow(new byte[] { 0x89, 0x64 }, 0x9, 0x6, (byte)19, (byte)20)]
+		[DataRow(new byte[] { 0x8A, 0x54 }, 0xA, 0x5, (byte)21, (byte)22)]
+		[DataRow(new byte[] { 0x8B, 0x44 }, 0xB, 0x4, (byte)23, (byte)0)]
+		[DataRow(new byte[] { 0x8C, 0x34 }, 0xC, 0x3, (byte)25, (byte)3)]
+		[DataRow(new byte[] { 0x8D, 0x24 }, 0xD, 0x2, (byte)5, (byte)7)]
+		[DataRow(new byte[] { 0x8E, 0x14 }, 0xE, 0x1, (byte)200, (byte)55)]
+		public void GivenInstruction8XY4AndRegistersVXAndVYWithValuesOfSumLessOrEqual255_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToSumOfVYAndVXAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[x] = initialRegisterXValue;
+			machine.State.Registers.V[y] = initialRegisterYValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(initialRegisterYValue + initialRegisterXValue, machine.State.Registers.V[x]);
+			Assert.AreEqual(0, machine.State.Registers.V[0xF]);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0x80, 0x14 }, 0x0, 0x1, (byte)255, (byte)2)]
+		[DataRow(new byte[] { 0x81, 0xE4 }, 0x1, 0xE, (byte)3, (byte)255)]
+		[DataRow(new byte[] { 0x82, 0xD4 }, 0x2, 0xD, (byte)5, (byte)255)]
+		[DataRow(new byte[] { 0x83, 0xC4 }, 0x3, 0xC, (byte)255, (byte)8)]
+		[DataRow(new byte[] { 0x84, 0xB4 }, 0x4, 0xB, (byte)255, (byte)10)]
+		[DataRow(new byte[] { 0x85, 0xA4 }, 0x5, 0xA, (byte)255, (byte)12)]
+		[DataRow(new byte[] { 0x86, 0x94 }, 0x6, 0x9, (byte)13, (byte)255)]
+		[DataRow(new byte[] { 0x87, 0x84 }, 0x7, 0x8, (byte)255, (byte)16)]
+		[DataRow(new byte[] { 0x88, 0x74 }, 0x8, 0x7, (byte)17, (byte)255)]
+		[DataRow(new byte[] { 0x89, 0x64 }, 0x9, 0x6, (byte)255, (byte)20)]
+		[DataRow(new byte[] { 0x8A, 0x54 }, 0xA, 0x5, (byte)21, (byte)255)]
+		[DataRow(new byte[] { 0x8B, 0x44 }, 0xB, 0x4, (byte)255, (byte)255)]
+		[DataRow(new byte[] { 0x8C, 0x34 }, 0xC, 0x3, (byte)25, (byte)255)]
+		[DataRow(new byte[] { 0x8D, 0x24 }, 0xD, 0x2, (byte)255, (byte)7)]
+		[DataRow(new byte[] { 0x8E, 0x14 }, 0xE, 0x1, (byte)255, (byte)8)]
+		public void GivenInstruction8XY4AndRegistersVXAndVYWithValuesOfSumGreaterThan255_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToOverflowedSumOfVYAndVXAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[x] = initialRegisterXValue;
+			machine.State.Registers.V[y] = initialRegisterYValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual((byte)(initialRegisterYValue + initialRegisterXValue), machine.State.Registers.V[x]);
+			Assert.AreEqual(1, machine.State.Registers.V[0xF]);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0x80, 0x15 }, 0x0, 0x1, (byte)1, (byte)2)]
+		[DataRow(new byte[] { 0x81, 0xE5 }, 0x1, 0xE, (byte)3, (byte)4)]
+		[DataRow(new byte[] { 0x82, 0xD5 }, 0x2, 0xD, (byte)5, (byte)6)]
+		[DataRow(new byte[] { 0x83, 0xC5 }, 0x3, 0xC, (byte)7, (byte)8)]
+		[DataRow(new byte[] { 0x84, 0xB5 }, 0x4, 0xB, (byte)9, (byte)10)]
+		[DataRow(new byte[] { 0x85, 0xA5 }, 0x5, 0xA, (byte)11, (byte)12)]
+		[DataRow(new byte[] { 0x86, 0x95 }, 0x6, 0x9, (byte)13, (byte)14)]
+		[DataRow(new byte[] { 0x87, 0x85 }, 0x7, 0x8, (byte)15, (byte)16)]
+		[DataRow(new byte[] { 0x88, 0x75 }, 0x8, 0x7, (byte)17, (byte)18)]
+		[DataRow(new byte[] { 0x89, 0x65 }, 0x9, 0x6, (byte)20, (byte)31)]
+		[DataRow(new byte[] { 0x8A, 0x55 }, 0xA, 0x5, (byte)12, (byte)98)]
+		[DataRow(new byte[] { 0x8B, 0x45 }, 0xB, 0x4, (byte)100, (byte)100)]
+		[DataRow(new byte[] { 0x8C, 0x35 }, 0xC, 0x3, (byte)57, (byte)73)]
+		[DataRow(new byte[] { 0x8D, 0x25 }, 0xD, 0x2, (byte)28, (byte)66)]
+		[DataRow(new byte[] { 0x8E, 0x15 }, 0xE, 0x1, (byte)33, (byte)85)]
+		public void GivenInstruction8XY5AndRegisterValuesVYGreaterOrEqualVX_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToDifferenceOfVYAndVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[x] = initialRegisterXValue;
+			machine.State.Registers.V[y] = initialRegisterYValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual((byte)(initialRegisterYValue - initialRegisterXValue), machine.State.Registers.V[x]);
+			Assert.AreEqual(1, machine.State.Registers.V[0xF]);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0x80, 0x15 }, 0x0, 0x1, (byte)10, (byte)2)]
+		[DataRow(new byte[] { 0x81, 0xE5 }, 0x1, 0xE, (byte)30, (byte)4)]
+		[DataRow(new byte[] { 0x82, 0xD5 }, 0x2, 0xD, (byte)50, (byte)6)]
+		[DataRow(new byte[] { 0x83, 0xC5 }, 0x3, 0xC, (byte)70, (byte)8)]
+		[DataRow(new byte[] { 0x84, 0xB5 }, 0x4, 0xB, (byte)90, (byte)10)]
+		[DataRow(new byte[] { 0x85, 0xA5 }, 0x5, 0xA, (byte)101, (byte)12)]
+		[DataRow(new byte[] { 0x86, 0x95 }, 0x6, 0x9, (byte)130, (byte)14)]
+		[DataRow(new byte[] { 0x87, 0x85 }, 0x7, 0x8, (byte)150, (byte)16)]
+		[DataRow(new byte[] { 0x88, 0x75 }, 0x8, 0x7, (byte)170, (byte)18)]
+		[DataRow(new byte[] { 0x89, 0x65 }, 0x9, 0x6, (byte)200, (byte)31)]
+		[DataRow(new byte[] { 0x8A, 0x55 }, 0xA, 0x5, (byte)120, (byte)98)]
+		[DataRow(new byte[] { 0x8B, 0x45 }, 0xB, 0x4, (byte)101, (byte)100)]
+		[DataRow(new byte[] { 0x8C, 0x35 }, 0xC, 0x3, (byte)57, (byte)7)]
+		[DataRow(new byte[] { 0x8D, 0x25 }, 0xD, 0x2, (byte)90, (byte)66)]
+		[DataRow(new byte[] { 0x8E, 0x15 }, 0xE, 0x1, (byte)123, (byte)85)]
+		public void GivenInstruction8XY5AndRegisterValuesVXGreaterThanVY_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToOverflowedDifferenceOfVYAndVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[x] = initialRegisterXValue;
+			machine.State.Registers.V[y] = initialRegisterYValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual((byte)(initialRegisterYValue - initialRegisterXValue), machine.State.Registers.V[x]);
+			Assert.AreEqual(0, machine.State.Registers.V[0xF]);
+		}
 	}
 }

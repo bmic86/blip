@@ -49,8 +49,25 @@
 				(0x8000, _, _, 0x0001) => ApplyVxOrVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				(0x8000, _, _, 0x0002) => ApplyVxAndVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				(0x8000, _, _, 0x0003) => ApplyVxXorVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x0004) => AddWithCarry(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x0005) => SubtractWithBorrow(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				_ => InvalidInstruction()
 			};
+		}
+
+		private ushort SubtractWithBorrow(int x, int y)
+		{
+			State.Registers.V[0xF] = (byte)(State.Registers.V[y] >= State.Registers.V[x] ? 1 : 0);
+			State.Registers.V[x] = (byte)(State.Registers.V[y] - State.Registers.V[x]);
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
+		private ushort AddWithCarry(int x, int y)
+		{
+			int result = State.Registers.V[y] + State.Registers.V[x];
+			State.Registers.V[x] = (byte)result;
+			State.Registers.V[0xF] = (byte)(result > byte.MaxValue ? 1 : 0);
+			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
 		private ushort ApplyVxXorVy(int x, int y)
