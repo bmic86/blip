@@ -51,14 +51,43 @@
 				(0x8000, _, _, 0x0003) => ApplyVxXorVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				(0x8000, _, _, 0x0004) => AddWithCarry(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				(0x8000, _, _, 0x0005) => SubtractWithBorrow(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x0006) => RightBitShift(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x0007) => ReversedSubtractWithBorrow(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x8000, _, _, 0x000E) => LeftBitShift(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x9000, _, _, 0x0000) => SkipNextOnRegistersNotEqual(nibbles.n2 >> 8, nibbles.n3 >> 4),
 				_ => InvalidInstruction()
 			};
 		}
 
+		private ushort LeftBitShift(int x, int y)
+		{
+			byte mostSignificantBit = (byte)((State.Registers.V[y] & 0b10000000) >> 7);
+			State.Registers.V[x] = (byte)(State.Registers.V[y] << 1);
+			State.Registers.V[0xF] = mostSignificantBit;
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
+		private ushort RightBitShift(int x, int y)
+		{
+			byte leastSignificantBit = (byte)(State.Registers.V[y] & 1);
+			State.Registers.V[x] = (byte)(State.Registers.V[y] >> 1);
+			State.Registers.V[0xF] = leastSignificantBit;
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
+		private ushort ReversedSubtractWithBorrow(int x, int y)
+		{
+			byte notBorrowFlag = (byte)(State.Registers.V[y] >= State.Registers.V[x] ? 1 : 0);
+			State.Registers.V[x] = (byte)(State.Registers.V[y] - State.Registers.V[x]);
+			State.Registers.V[0xF] = notBorrowFlag;
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
 		private ushort SubtractWithBorrow(int x, int y)
 		{
-			State.Registers.V[0xF] = (byte)(State.Registers.V[y] >= State.Registers.V[x] ? 1 : 0);
-			State.Registers.V[x] = (byte)(State.Registers.V[y] - State.Registers.V[x]);
+			byte notBorrowFlag = (byte)(State.Registers.V[x] >= State.Registers.V[y] ? 1 : 0);
+			State.Registers.V[x] = (byte)(State.Registers.V[x] - State.Registers.V[y]);
+			State.Registers.V[0xF] = notBorrowFlag;
 			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
@@ -121,6 +150,12 @@
 		private ushort SkipNextOnRegistersEqual(int x, int y)
 		{
 			int offset = State.Registers.V[x] == State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
+			return (ushort)(State.Registers.PC + offset);
+		}
+
+		private ushort SkipNextOnRegistersNotEqual(int x, int y)
+		{
+			int offset = State.Registers.V[x] != State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
 			return (ushort)(State.Registers.PC + offset);
 		}
 
