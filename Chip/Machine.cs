@@ -26,35 +26,35 @@
 			isInvalidInstruction = false;
 			while (!isInvalidInstruction && IsNextInstructionAccessible())
 			{
-				ushort currentPc = State.Registers.PC;
-				int instructionCode = ExtractInstructionCode(State.Memory[currentPc], State.Memory[currentPc + 1]);
-				State.Registers.PC = Execute(instructionCode);
+				State.Registers.PC = ExecuteNextInstruction();
 			}
 		}
 
 		private bool IsNextInstructionAccessible() => State.Registers.PC + InstructionSize < Default.MemorySize;
 
-		private ushort Execute(int instructionCode)
+		private ushort ExecuteNextInstruction()
 		{
-			var nibbles = ExtractNibbles(instructionCode);
-			return nibbles switch
+			ushort currentPc = State.Registers.PC;
+			var instruction = new Instruction(State.Memory[currentPc], State.Memory[currentPc + 1]);
+
+			return instruction.Nibbles switch
 			{
-				(0x1000, _, _, _) => (ushort)(instructionCode & 0x0FFF),
-				(0x3000, _, _, _) => SkipNextOnEqual(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
-				(0x4000, _, _, _) => SkipNextOnNotEqual(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
-				(0x5000, _, _, 0x0000) => SkipNextOnRegistersEqual(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x6000, _, _, _) => LoadValueToRegister(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
-				(0x7000, _, _, _) => AddValueToRegister(nibbles.n2 >> 8, (byte)(instructionCode & 0x00FF)),
-				(0x8000, _, _, 0x0000) => CopyRegisterVyToRegisterVx(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x0001) => ApplyVxOrVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x0002) => ApplyVxAndVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x0003) => ApplyVxXorVy(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x0004) => AddWithCarry(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x0005) => SubtractWithBorrow(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x0006) => RightBitShift(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x0007) => ReversedSubtractWithBorrow(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x8000, _, _, 0x000E) => LeftBitShift(nibbles.n2 >> 8, nibbles.n3 >> 4),
-				(0x9000, _, _, 0x0000) => SkipNextOnRegistersNotEqual(nibbles.n2 >> 8, nibbles.n3 >> 4),
+				(0x1000, _, _, _) => instruction.Address,
+				(0x3000, _, _, _) => SkipNextOnEqual(instruction.VXIndex, instruction.Value),
+				(0x4000, _, _, _) => SkipNextOnNotEqual(instruction.VXIndex, instruction.Value),
+				(0x5000, _, _, 0x0000) => SkipNextOnRegistersEqual(instruction.VXIndex, instruction.VYIndex),
+				(0x6000, _, _, _) => LoadValueToRegister(instruction.VXIndex, instruction.Value),
+				(0x7000, _, _, _) => AddValueToRegister(instruction.VXIndex, instruction.Value),
+				(0x8000, _, _, 0x0000) => CopyRegisterVyToRegisterVx(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x0001) => ApplyVxOrVy(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x0002) => ApplyVxAndVy(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x0003) => ApplyVxXorVy(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x0004) => AddWithCarry(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x0005) => SubtractWithBorrow(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x0006) => RightBitShift(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x0007) => ReversedSubtractWithBorrow(instruction.VXIndex, instruction.VYIndex),
+				(0x8000, _, _, 0x000E) => LeftBitShift(instruction.VXIndex, instruction.VYIndex),
+				(0x9000, _, _, 0x0000) => SkipNextOnRegistersNotEqual(instruction.VXIndex, instruction.VYIndex),
 				_ => InvalidInstruction()
 			};
 		}
@@ -164,11 +164,5 @@
 			isInvalidInstruction = true;
 			return State.Registers.PC;
 		}
-
-		private static int ExtractInstructionCode(byte highOrderInstructionByte, byte lowOrderInstructionByte) =>
-			(highOrderInstructionByte << 8) | lowOrderInstructionByte;
-
-		private static (int n1, int n2, int n3, int n4) ExtractNibbles(int value) =>
-			(n1: value & 0xF000, n2: value & 0x0F00, n3: value & 0x00F0, n4: value & 0x000F);
 	}
 }
