@@ -544,6 +544,38 @@ namespace ChipTests
 		}
 
 		[TestMethod]
+		[DataRow(new byte[] { 0x80, 0x16 }, 0x0, 0x1, (byte)0b00000001, (byte)0b00000000, (byte)1)]
+		[DataRow(new byte[] { 0x81, 0xE6 }, 0x1, 0xE, (byte)0b00000010, (byte)0b00000001, (byte)0)]
+		[DataRow(new byte[] { 0x82, 0xD6 }, 0x2, 0xD, (byte)0b00000100, (byte)0b00000010, (byte)0)]
+		[DataRow(new byte[] { 0x83, 0xC6 }, 0x3, 0xC, (byte)0b00000101, (byte)0b00000010, (byte)1)]
+		[DataRow(new byte[] { 0x84, 0xB6 }, 0x4, 0xB, (byte)0b00010101, (byte)0b00001010, (byte)1)]
+		[DataRow(new byte[] { 0x85, 0xA6 }, 0x5, 0xA, (byte)0b00010100, (byte)0b00001010, (byte)0)]
+		[DataRow(new byte[] { 0x86, 0x96 }, 0x6, 0x9, (byte)0b11110000, (byte)0b01111000, (byte)0)]
+		[DataRow(new byte[] { 0x87, 0x86 }, 0x7, 0x8, (byte)0b00001111, (byte)0b00000111, (byte)1)]
+		[DataRow(new byte[] { 0x88, 0x76 }, 0x8, 0x7, (byte)0b10000000, (byte)0b01000000, (byte)0)]
+		[DataRow(new byte[] { 0x89, 0x66 }, 0x9, 0x6, (byte)0b10000001, (byte)0b01000000, (byte)1)]
+		[DataRow(new byte[] { 0x8A, 0x56 }, 0xA, 0x5, (byte)0b10000010, (byte)0b01000001, (byte)0)]
+		[DataRow(new byte[] { 0x8B, 0x46 }, 0xB, 0x4, (byte)0b10101010, (byte)0b01010101, (byte)0)]
+		[DataRow(new byte[] { 0x8C, 0x36 }, 0xC, 0x3, (byte)0b01010101, (byte)0b00101010, (byte)1)]
+		[DataRow(new byte[] { 0x8D, 0x26 }, 0xD, 0x2, (byte)0b11111110, (byte)0b01111111, (byte)0)]
+		[DataRow(new byte[] { 0x8E, 0x16 }, 0xE, 0x1, (byte)0b11111111, (byte)0b01111111, (byte)1)]
+		public void GivenInstruction8XY6_WhenExecuteProgram_ThenStoreVYWithBitsShiftedRightInVXAndStoreLeastSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[y] = initialRegisterYValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(expectedXValue, machine.State.Registers.V[x]);
+			Assert.AreEqual(expectedVFValue, machine.State.Registers.V[0xF]);
+		}
+
+		[TestMethod]
 		[DataRow(new byte[] { 0x80, 0x17 }, 0x0, 0x1, (byte)1, (byte)2)]
 		[DataRow(new byte[] { 0x81, 0xE7 }, 0x1, 0xE, (byte)2, (byte)4)]
 		[DataRow(new byte[] { 0x82, 0xD7 }, 0x2, 0xD, (byte)4, (byte)6)]
@@ -607,6 +639,38 @@ namespace ChipTests
 			// Then
 			Assert.AreEqual((byte)(initialRegisterYValue - initialRegisterXValue), machine.State.Registers.V[x]);
 			Assert.AreEqual(0, machine.State.Registers.V[0xF]);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0x80, 0x1E }, 0x0, 0x1, (byte)0b00000001, (byte)0b00000010, (byte)0)]
+		[DataRow(new byte[] { 0x81, 0xEE }, 0x1, 0xE, (byte)0b00000010, (byte)0b00000100, (byte)0)]
+		[DataRow(new byte[] { 0x82, 0xDE }, 0x2, 0xD, (byte)0b00000100, (byte)0b00001000, (byte)0)]
+		[DataRow(new byte[] { 0x83, 0xCE }, 0x3, 0xC, (byte)0b10000101, (byte)0b00001010, (byte)1)]
+		[DataRow(new byte[] { 0x84, 0xBE }, 0x4, 0xB, (byte)0b10010101, (byte)0b00101010, (byte)1)]
+		[DataRow(new byte[] { 0x85, 0xAE }, 0x5, 0xA, (byte)0b00010100, (byte)0b00101000, (byte)0)]
+		[DataRow(new byte[] { 0x86, 0x9E }, 0x6, 0x9, (byte)0b11110000, (byte)0b11100000, (byte)1)]
+		[DataRow(new byte[] { 0x87, 0x8E }, 0x7, 0x8, (byte)0b00001111, (byte)0b00011110, (byte)0)]
+		[DataRow(new byte[] { 0x88, 0x7E }, 0x8, 0x7, (byte)0b10000000, (byte)0b00000000, (byte)1)]
+		[DataRow(new byte[] { 0x89, 0x6E }, 0x9, 0x6, (byte)0b10000001, (byte)0b00000010, (byte)1)]
+		[DataRow(new byte[] { 0x8A, 0x5E }, 0xA, 0x5, (byte)0b01000001, (byte)0b10000010, (byte)0)]
+		[DataRow(new byte[] { 0x8B, 0x4E }, 0xB, 0x4, (byte)0b10101010, (byte)0b01010100, (byte)1)]
+		[DataRow(new byte[] { 0x8C, 0x3E }, 0xC, 0x3, (byte)0b00101010, (byte)0b01010100, (byte)0)]
+		[DataRow(new byte[] { 0x8D, 0x2E }, 0xD, 0x2, (byte)0b01111111, (byte)0b11111110, (byte)0)]
+		[DataRow(new byte[] { 0x8E, 0x1E }, 0xE, 0x1, (byte)0b11111111, (byte)0b11111110, (byte)1)]
+		public void GivenInstruction8XYE_WhenExecuteProgram_ThenStoreVYWithBitsShiftedLeftInVXAndStoreMostSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[y] = initialRegisterYValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(expectedXValue, machine.State.Registers.V[x]);
+			Assert.AreEqual(expectedVFValue, machine.State.Registers.V[0xF]);
 		}
 	}
 }
