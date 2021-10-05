@@ -55,6 +55,8 @@
 				(0x8000, _, _, 0x0007) => ReversedSubtractWithBorrow(instruction.VXIndex, instruction.VYIndex),
 				(0x8000, _, _, 0x000E) => LeftBitShift(instruction.VXIndex, instruction.VYIndex),
 				(0x9000, _, _, 0x0000) => SkipNextOnRegistersNotEqual(instruction.VXIndex, instruction.VYIndex),
+				(0xA000, _, _, _) => LoadAddressToIndexRegister(instruction.Address),
+				(0xB000, _, _, _) => (ushort)(instruction.Address + State.Registers.V[0]),
 				_ => InvalidInstruction()
 			};
 		}
@@ -157,6 +159,12 @@
 		{
 			int offset = State.Registers.V[x] != State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
 			return (ushort)(State.Registers.PC + offset);
+		}
+
+		private ushort LoadAddressToIndexRegister(ushort address)
+		{
+			State.Registers.I = address;
+			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
 		private ushort InvalidInstruction()

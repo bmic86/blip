@@ -738,5 +738,43 @@ namespace ChipTests
 			// Then
 			Assert.AreEqual(Default.StartAddress + 2, machine.State.Registers.PC);
 		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xA0, 0x00 }, (ushort)0x000)]
+		[DataRow(new byte[] { 0xA1, 0x23 }, (ushort)0x123)]
+		[DataRow(new byte[] { 0xAF, 0xFF }, (ushort)0xFFF)]
+		public void GivenInstructionANNN_WhenExecuteProgram_ThenStoreAddressNNNInIndexRegister(byte[] instruction, ushort expectedResult)
+		{
+			// Given
+			byte[] program = instruction;
+			var machine = new Machine();
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(expectedResult, machine.State.Registers.I);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xB0, 0x00 }, (byte)0x00, (ushort)0x0000)]
+		[DataRow(new byte[] { 0xBA, 0xBC }, (byte)0x00, (ushort)0x0ABC)]
+		[DataRow(new byte[] { 0xB0, 0x00 }, (byte)0xEF, (ushort)0x00EF)]
+		[DataRow(new byte[] { 0xB1, 0x23 }, (byte)0x45, (ushort)0x0168)]
+		[DataRow(new byte[] { 0xBF, 0xFF }, (byte)0xFF, (ushort)0x10FE)]
+		public void GivenInstructionBNNN_WhenExecuteProgram_ProgramShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[0] = initialRegisterValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(expectedResult, machine.State.Registers.PC);
+		}
 	}
 }
