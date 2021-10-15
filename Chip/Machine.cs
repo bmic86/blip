@@ -1,4 +1,7 @@
-﻿namespace Chip
+﻿using Chip.Random;
+using System;
+
+namespace Chip
 {
 
 	internal class Machine
@@ -7,7 +10,12 @@
 
 		internal MachineState State { get; private set; } = new();
 
-		private bool isInvalidInstruction = false;
+		private bool _isInvalidInstruction = false;
+		private readonly IRandomGenerator _randomGenerator;
+
+		internal Machine() => _randomGenerator = new RandomGenerator();
+
+		internal Machine(IRandomGenerator randomGenerator) => _randomGenerator = randomGenerator;
 
 		internal void ExecuteProgram(byte[] program)
 		{
@@ -23,8 +31,8 @@
 
 		private void Start()
 		{
-			isInvalidInstruction = false;
-			while (!isInvalidInstruction && IsNextInstructionAccessible())
+			_isInvalidInstruction = false;
+			while (!_isInvalidInstruction && IsNextInstructionAccessible())
 			{
 				State.Registers.PC = ExecuteNextInstruction();
 			}
@@ -57,6 +65,7 @@
 				(0x9000, _, _, 0x0000) => SkipNextOnRegistersNotEqual(instruction.VXIndex, instruction.VYIndex),
 				(0xA000, _, _, _) => LoadAddressToIndexRegister(instruction.Address),
 				(0xB000, _, _, _) => (ushort)(instruction.Address + State.Registers.V[0]),
+				(0xC000, _, _, _) => SetRandomValueWithMaskOnVx(instruction.VXIndex, instruction.Value),
 				_ => InvalidInstruction()
 			};
 		}
@@ -167,9 +176,15 @@
 			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
+		private ushort SetRandomValueWithMaskOnVx(int x, byte mask)
+		{
+			State.Registers.V[x] = (byte)(_randomGenerator.Generate() & mask);
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
 		private ushort InvalidInstruction()
 		{
-			isInvalidInstruction = true;
+			_isInvalidInstruction = true;
 			return State.Registers.PC;
 		}
 	}

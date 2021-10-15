@@ -8,7 +8,7 @@ namespace Chip
 {
 	internal struct Instruction
 	{
-		int _instructionCode;
+		private readonly int _instructionCode;
 
 		public (int n1, int n2, int n3, int n4) Nibbles { get; private set; }
 

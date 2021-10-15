@@ -1,5 +1,7 @@
 ﻿using Chip;
+using Chip.Random;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace ChipTests
 {
@@ -775,6 +777,40 @@ namespace ChipTests
 
 			// Then
 			Assert.AreEqual(expectedResult, machine.State.Registers.PC);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xC0, 0xFF }, (byte)0x00, (byte)0xFF, (byte)0xFF)]
+		[DataRow(new byte[] { 0xC1, 0x0F }, (byte)0x01, (byte)0xFF, (byte)0x0F)]
+		[DataRow(new byte[] { 0xC2, 0xF0 }, (byte)0x02, (byte)0xFF, (byte)0xF0)]
+		[DataRow(new byte[] { 0xC3, 0xFF }, (byte)0x03, (byte)0x0F, (byte)0x0F)]
+		[DataRow(new byte[] { 0xC4, 0xFF }, (byte)0x04, (byte)0xF0, (byte)0xF0)]
+		[DataRow(new byte[] { 0xC5, 0x00 }, (byte)0x05, (byte)0xFF, (byte)0x00)]
+		[DataRow(new byte[] { 0xC6, 0xFF }, (byte)0x06, (byte)0x00, (byte)0x00)]
+		[DataRow(new byte[] { 0xC7, 0b10101010 }, (byte)0x07, (byte)0b00100000, (byte)0b00100000)]
+		[DataRow(new byte[] { 0xC8, 0b01010101 }, (byte)0x08, (byte)0b01000001, (byte)0b01000001)]
+		[DataRow(new byte[] { 0xC9, 0b11001100 }, (byte)0x09, (byte)0b01010101, (byte)0b01000100)]
+		[DataRow(new byte[] { 0xCA, 0b11101010 }, (byte)0x0A, (byte)0b11110000, (byte)0b11100000)]
+		[DataRow(new byte[] { 0xCB, 0b11010011 }, (byte)0x0B, (byte)0b10000001, (byte)0b10000001)]
+		[DataRow(new byte[] { 0xCC, 0b10000001 }, (byte)0x0C, (byte)0b11010011, (byte)0b10000001)]
+		[DataRow(new byte[] { 0xCD, 0b11111000 }, (byte)0x0D, (byte)0b00011000, (byte)0b00011000)]
+		[DataRow(new byte[] { 0xCE, 0b00011000 }, (byte)0x0E, (byte)0b11111000, (byte)0b00011000)]
+		[DataRow(new byte[] { 0xCF, 0b01010101 }, (byte)0x0F, (byte)0b10101010, (byte)0x00)]
+		public void GivenInstructionCXNN_WhenExecuteProgram_ShouldSetVXToRandomNumberWithMaskNN(byte[] instruction, byte x, byte randomValue, ushort expectedResult)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var randomGenerator = Substitute.For<IRandomGenerator>();
+			randomGenerator.Generate().Returns(randomValue);
+
+			var machine = new Machine(randomGenerator);
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(expectedResult, machine.State.Registers.V[x]);
 		}
 	}
 }
