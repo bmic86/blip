@@ -66,8 +66,15 @@ namespace Chip
 				(0xA000, _, _, _) => LoadAddressToIndexRegister(instruction.Address),
 				(0xB000, _, _, _) => (ushort)(instruction.Address + State.Registers.V[0]),
 				(0xC000, _, _, _) => SetRandomValueWithMaskOnVx(instruction.VXIndex, instruction.Value),
+				(0xF000, _, 0x0010, 0x000E) => AddVxToIndexRegister(instruction.VXIndex),
 				_ => InvalidInstruction()
 			};
+		}
+
+		private ushort AddVxToIndexRegister(int x)
+		{
+			State.Registers.I += State.Registers.V[x];
+			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
 		private ushort LeftBitShift(int x, int y)

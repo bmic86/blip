@@ -812,5 +812,38 @@ namespace ChipTests
 			// Then
 			Assert.AreEqual(expectedResult, machine.State.Registers.V[x]);
 		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xF0, 0x1E }, (byte)0x0, (byte)1, (byte)2)]
+		[DataRow(new byte[] { 0xF1, 0x1E }, (byte)0x1, (byte)0, (byte)3)]
+		[DataRow(new byte[] { 0xF2, 0x1E }, (byte)0x2, (byte)4, (byte)0)]
+		[DataRow(new byte[] { 0xF3, 0x1E }, (byte)0x3, (byte)255, (byte)255)]
+		[DataRow(new byte[] { 0xF4, 0x1E }, (byte)0x4, (byte)5, (byte)6)]
+		[DataRow(new byte[] { 0xF5, 0x1E }, (byte)0x5, (byte)10, (byte)10)]
+		[DataRow(new byte[] { 0xF6, 0x1E }, (byte)0x6, (byte)255, (byte)0)]
+		[DataRow(new byte[] { 0xF7, 0x1E }, (byte)0x7, (byte)0, (byte)255)]
+		[DataRow(new byte[] { 0xF8, 0x1E }, (byte)0x8, (byte)0, (byte)0)]
+		[DataRow(new byte[] { 0xF9, 0x1E }, (byte)0x9, (byte)8, (byte)12)]
+		[DataRow(new byte[] { 0xFA, 0x1E }, (byte)0xA, (byte)23, (byte)35)]
+		[DataRow(new byte[] { 0xFB, 0x1E }, (byte)0xB, (byte)10, (byte)20)]
+		[DataRow(new byte[] { 0xFC, 0x1E }, (byte)0xC, (byte)123, (byte)234)]
+		[DataRow(new byte[] { 0xFD, 0x1E }, (byte)0xD, (byte)76, (byte)34)]
+		[DataRow(new byte[] { 0xFE, 0x1E }, (byte)0xE, (byte)128, (byte)127)]
+		[DataRow(new byte[] { 0xFF, 0x1E }, (byte)0xF, (byte)45, (byte)59)]
+		public void GivenInstructionFX1E_WhenExecuteProgram_ShouldSumIndexRegisterWithVx(byte[] instruction, byte x, byte initialIndexValue, byte initialVxValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.I = initialIndexValue;
+			machine.State.Registers.V[x] = initialVxValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(initialIndexValue + initialVxValue, machine.State.Registers.I);
+		}
 	}
 }
