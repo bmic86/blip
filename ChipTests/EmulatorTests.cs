@@ -37,5 +37,18 @@ namespace ChipTests
 			// Then
 			Assert.ThrowsException<ArgumentNullException>(action);
 		}
+
+		[TestMethod]
+		public void GivenTooLargeProgram_WhenTryingToRunIt_ThenThrowException()
+		{
+			// Given
+			byte[] program = new byte[3585];
+
+			// When
+			void action() => new Emulator().RunProgram(program);
+
+			// Then
+			Assert.ThrowsException<InvalidProgramException>(action);
+		}
 	}
 }

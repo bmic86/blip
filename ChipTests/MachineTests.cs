@@ -2,6 +2,7 @@
 using Chip.Random;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System;
 
 namespace ChipTests
 {
@@ -12,7 +13,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x10, 0x00 }, (ushort)0x000)]
 		[DataRow(new byte[] { 0x12, 0x34 }, (ushort)0x234)]
 		[DataRow(new byte[] { 0x1F, 0xFF }, (ushort)0xFFF)]
-		public void GivenInstruction1NNN_WhenExecuteProgram_ThenProgramShouldJumpToAddressNNN(byte[] instruction, ushort expectedResult) 
+		public void GivenInstruction1NNN_WhenExecuteProgram_ThenProgramShouldJumpToAddressNNN(byte[] instruction, ushort expectedResult)
 		{
 			// Given
 			var machine = new Machine();
@@ -830,7 +831,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xFD, 0x1E }, (byte)0xD, (byte)76, (byte)34)]
 		[DataRow(new byte[] { 0xFE, 0x1E }, (byte)0xE, (byte)128, (byte)127)]
 		[DataRow(new byte[] { 0xFF, 0x1E }, (byte)0xF, (byte)45, (byte)59)]
-		public void GivenInstructionFX1E_WhenExecuteProgram_ShouldSumIndexRegisterWithVx(byte[] instruction, byte x, byte initialIndexValue, byte initialVxValue)
+		public void GivenInstructionFX1E_WhenExecuteProgram_ShouldSumIndexRegisterWithVX(byte[] instruction, byte x, byte initialIndexValue, byte initialVxValue)
 		{
 			// Given
 			byte[] program = instruction;
@@ -844,6 +845,74 @@ namespace ChipTests
 
 			// Then
 			Assert.AreEqual(initialIndexValue + initialVxValue, machine.State.Registers.I);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xF0, 0x29 }, (byte)0x0, (byte)0xF, (ushort)75)]
+		[DataRow(new byte[] { 0xF1, 0x29 }, (byte)0x1, (byte)0xE, (ushort)70)]
+		[DataRow(new byte[] { 0xF2, 0x29 }, (byte)0x2, (byte)0xD, (ushort)65)]
+		[DataRow(new byte[] { 0xF3, 0x29 }, (byte)0x3, (byte)0xC, (ushort)60)]
+		[DataRow(new byte[] { 0xF4, 0x29 }, (byte)0x4, (byte)0xB, (ushort)55)]
+		[DataRow(new byte[] { 0xF5, 0x29 }, (byte)0x5, (byte)0xA, (ushort)50)]
+		[DataRow(new byte[] { 0xF6, 0x29 }, (byte)0x6, (byte)0x9, (ushort)45)]
+		[DataRow(new byte[] { 0xF7, 0x29 }, (byte)0x7, (byte)0x8, (ushort)40)]
+		[DataRow(new byte[] { 0xF8, 0x29 }, (byte)0x8, (byte)0x7, (ushort)35)]
+		[DataRow(new byte[] { 0xF9, 0x29 }, (byte)0x9, (byte)0x6, (ushort)30)]
+		[DataRow(new byte[] { 0xFA, 0x29 }, (byte)0xA, (byte)0x5, (ushort)25)]
+		[DataRow(new byte[] { 0xFB, 0x29 }, (byte)0xB, (byte)0x4, (ushort)20)]
+		[DataRow(new byte[] { 0xFC, 0x29 }, (byte)0xC, (byte)0x3, (ushort)15)]
+		[DataRow(new byte[] { 0xFD, 0x29 }, (byte)0xD, (byte)0x2, (ushort)10)]
+		[DataRow(new byte[] { 0xFE, 0x29 }, (byte)0xE, (byte)0x1, (ushort)5)]
+		[DataRow(new byte[] { 0xFF, 0x29 }, (byte)0xF, (byte)0x0, (ushort)0)]
+		[DataRow(new byte[] { 0xFF, 0x29 }, (byte)0xF, (byte)0x18, (ushort)40)]
+		public void GivenInstructionFX29_WhenExecuteProgram_SetIndexRegisterToCharacterSpriteAddressOfLowestSignificantDigitInVXValue(byte[] instruction, byte x, byte initialVxValue, ushort expectedValue)
+		{
+			// Given
+			byte[] program = instruction;
+
+			var machine = new Machine();
+			machine.State.Registers.V[x] = initialVxValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			Assert.AreEqual(expectedValue, machine.State.Registers.I);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xF0, 0x33 }, (byte)0x0, (byte)123, new byte[] { 1, 2, 3 })]
+		[DataRow(new byte[] { 0xF1, 0x33 }, (byte)0x1, (byte)254, new byte[] { 2, 5, 4 })]
+		[DataRow(new byte[] { 0xF2, 0x33 }, (byte)0x2, (byte)10, new byte[] { 0, 1, 0 })]
+		[DataRow(new byte[] { 0xF3, 0x33 }, (byte)0x3, (byte)1, new byte[] { 0, 0, 1 })]
+		[DataRow(new byte[] { 0xF4, 0x33 }, (byte)0x4, (byte)32, new byte[] { 0, 3, 2 })]
+		[DataRow(new byte[] { 0xF5, 0x33 }, (byte)0x5, (byte)140, new byte[] { 1, 4, 0 })]
+		[DataRow(new byte[] { 0xF6, 0x33 }, (byte)0x6, (byte)128, new byte[] { 1, 2, 8 })]
+		[DataRow(new byte[] { 0xF7, 0x33 }, (byte)0x7, (byte)255, new byte[] { 2, 5, 5 })]
+		[DataRow(new byte[] { 0xF8, 0x33 }, (byte)0x8, (byte)65, new byte[] { 0, 6, 5 })]
+		[DataRow(new byte[] { 0xF9, 0x33 }, (byte)0x9, (byte)16, new byte[] { 0, 1, 6 })]
+		[DataRow(new byte[] { 0xFA, 0x33 }, (byte)0xA, (byte)105, new byte[] { 1, 0, 5 })]
+		[DataRow(new byte[] { 0xFB, 0x33 }, (byte)0xB, (byte)6, new byte[] { 0, 0, 6 })]
+		[DataRow(new byte[] { 0xFC, 0x33 }, (byte)0xC, (byte)59, new byte[] { 0, 5, 9 })]
+		[DataRow(new byte[] { 0xFD, 0x33 }, (byte)0xD, (byte)74, new byte[] { 0, 7, 4 })]
+		[DataRow(new byte[] { 0xFE, 0x33 }, (byte)0xE, (byte)15, new byte[] { 0, 1, 5 })]
+		[DataRow(new byte[] { 0xFF, 0x33 }, (byte)0xF, (byte)0, new byte[] { 0, 0, 0 })]
+		public void GivenInstructionFX33_WhenExecuteProgram_StoreValueOfVXInMemoryAsBinaryCodedDecimal(byte[] instruction, byte x, byte initialVxValue, byte[] expectedResult)
+		{
+			// Given
+			byte[] program = instruction;
+
+			const ushort initialIndexValue = 0x300;
+
+			var machine = new Machine();
+			machine.State.Registers.V[x] = initialVxValue;
+			machine.State.Registers.I = initialIndexValue;
+
+			// When
+			machine.ExecuteProgram(program);
+
+			// Then
+			CollectionAssert.AreEqual(expectedResult, new ArraySegment<byte>(machine.State.Memory, initialIndexValue, 3).ToArray());
 		}
 	}
 }

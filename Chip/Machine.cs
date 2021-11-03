@@ -1,4 +1,5 @@
-﻿using Chip.Random;
+﻿using Chip.Exceptions;
+using Chip.Random;
 using System;
 
 namespace Chip
@@ -10,7 +11,7 @@ namespace Chip
 
 		internal MachineState State { get; private set; } = new();
 
-		private bool _isInvalidInstruction = false;
+		private bool _isBreakInstruction = false;
 		private readonly IRandomGenerator _randomGenerator;
 
 		internal Machine() => _randomGenerator = new RandomGenerator();
@@ -19,20 +20,30 @@ namespace Chip
 
 		internal void ExecuteProgram(byte[] program)
 		{
-			LoadProgram(program);
+			State.Registers.PC = Default.StartAddress;
+			InitializeMemory(program);
 			Start();
 		}
 
-		private void LoadProgram(byte[] program)
+		private void InitializeMemory(byte[] program)
 		{
+			CharacterSprites.Data.CopyTo(State.Memory, 0);
+
+			Array.Clear(State.Memory,
+				CharacterSprites.TotalDataSize,
+				Default.StartAddress - CharacterSprites.TotalDataSize);
+
 			program.CopyTo(State.Memory, Default.StartAddress);
-			State.Registers.PC = Default.StartAddress;
+
+			Array.Clear(State.Memory,
+				Default.StartAddress + program.Length,
+				State.Memory.Length - Default.StartAddress - program.Length);
 		}
 
 		private void Start()
 		{
-			_isInvalidInstruction = false;
-			while (!_isInvalidInstruction && IsNextInstructionAccessible())
+			_isBreakInstruction = false;
+			while (!_isBreakInstruction && IsNextInstructionAccessible())
 			{
 				State.Registers.PC = ExecuteNextInstruction();
 			}
@@ -67,8 +78,31 @@ namespace Chip
 				(0xB000, _, _, _) => (ushort)(instruction.Address + State.Registers.V[0]),
 				(0xC000, _, _, _) => SetRandomValueWithMaskOnVx(instruction.VXIndex, instruction.Value),
 				(0xF000, _, 0x0010, 0x000E) => AddVxToIndexRegister(instruction.VXIndex),
-				_ => InvalidInstruction()
+				(0xF000, _, 0x0020, 0x0009) => SetIndexRegisterToCharacterSpriteAddress(instruction.VXIndex),
+				(0xF000, _, 0x0030, 0x0003) => StoreVxAsBinaryCodedDecimal(instruction.VXIndex),
+				_ => BreakInstruction()
 			};
+		}
+
+		private ushort StoreVxAsBinaryCodedDecimal(int x)
+		{
+			int index = State.Registers.I;
+			if (index + 2 >= State.Memory.Length)
+			{
+				throw new ProgramExecutionException($"Cannot store V{x:X1} value as BCD under address 0x{index:X4}: operation will overflow the memory.");
+			}
+
+			State.Memory[index] = (byte)(State.Registers.V[x] / 100);
+			State.Memory[index + 1] = (byte)(State.Registers.V[x] / 10 % 10);
+			State.Memory[index + 2] = (byte)(State.Registers.V[x] % 10);
+
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
+		private ushort SetIndexRegisterToCharacterSpriteAddress(int x)
+		{
+			State.Registers.I = (ushort)((State.Registers.V[x] % CharacterSprites.CharactersCount) * CharacterSprites.CharacterSize);
+			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
 		private ushort AddVxToIndexRegister(int x)
@@ -189,9 +223,9 @@ namespace Chip
 			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
-		private ushort InvalidInstruction()
+		private ushort BreakInstruction()
 		{
-			_isInvalidInstruction = true;
+			_isBreakInstruction = true;
 			return State.Registers.PC;
 		}
 	}
