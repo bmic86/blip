@@ -25,6 +25,7 @@ namespace Chip
 				throw new InvalidChipProgramException("Program is too large, it cannot be loaded into the memory.");
 			}
 
+			State.Stack.Clear();
 			State.Registers.ClearAll();
 			State.Registers.PC = Default.StartAddress;
 			InitializeMemory(program);
