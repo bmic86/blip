@@ -30,7 +30,7 @@ namespace Chip
 			InitializeMemory(program);
 		}
 
-		public void ProcessNextMachineCycle() => 
+		public void ProcessNextMachineCycle() =>
 			State.Registers.PC = ExecuteNextInstruction();
 
 		private void InitializeMemory(byte[] program)
@@ -77,8 +77,34 @@ namespace Chip
 				(0xF000, _, 0x0010, 0x000E) => AddVxToIndexRegister(instruction.VXIndex),
 				(0xF000, _, 0x0020, 0x0009) => SetIndexRegisterToCharacterSpriteAddress(instruction.VXIndex),
 				(0xF000, _, 0x0030, 0x0003) => StoreVxAsBinaryCodedDecimal(instruction.VXIndex),
+				(0xF000, _, 0x0050, 0x0005) => StoreRegistersInBulk(instruction.VXIndex),
+				(0xF000, _, 0x0060, 0x0005) => LoadRegistersInBulk(instruction.VXIndex),
 				_ => throw new ChipProgramExecutionException($"Unrecognized instruction.")
 			};
+		}
+
+		private ushort LoadRegistersInBulk(int x)
+		{
+			for (int i = 0; i <= x; ++i)
+			{
+				int memoryAddress = State.Registers.I;
+				State.Registers.V[i] = State.Memory[memoryAddress];
+				++State.Registers.I;
+			}
+
+			return (ushort)(State.Registers.PC + InstructionSize);
+		}
+
+		private ushort StoreRegistersInBulk(int x)
+		{
+			for (int i = 0; i <= x; ++i)
+			{
+				int memoryAddress = State.Registers.I;
+				State.Memory[memoryAddress] = State.Registers.V[i];
+				++State.Registers.I;
+			}
+
+			return (ushort)(State.Registers.PC + InstructionSize);
 		}
 
 		private ushort StoreVxAsBinaryCodedDecimal(int x)

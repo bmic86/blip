@@ -4,6 +4,7 @@ using Chip.Random;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System;
+using System.Linq;
 
 namespace ChipTests
 {
@@ -834,23 +835,23 @@ namespace ChipTests
 		}
 
 		[TestMethod]
-		[DataRow(new byte[] { 0xF0, 0x1E }, (byte)0x0, (byte)1, (byte)2)]
-		[DataRow(new byte[] { 0xF1, 0x1E }, (byte)0x1, (byte)0, (byte)3)]
-		[DataRow(new byte[] { 0xF2, 0x1E }, (byte)0x2, (byte)4, (byte)0)]
-		[DataRow(new byte[] { 0xF3, 0x1E }, (byte)0x3, (byte)255, (byte)255)]
-		[DataRow(new byte[] { 0xF4, 0x1E }, (byte)0x4, (byte)5, (byte)6)]
-		[DataRow(new byte[] { 0xF5, 0x1E }, (byte)0x5, (byte)10, (byte)10)]
-		[DataRow(new byte[] { 0xF6, 0x1E }, (byte)0x6, (byte)255, (byte)0)]
-		[DataRow(new byte[] { 0xF7, 0x1E }, (byte)0x7, (byte)0, (byte)255)]
-		[DataRow(new byte[] { 0xF8, 0x1E }, (byte)0x8, (byte)0, (byte)0)]
-		[DataRow(new byte[] { 0xF9, 0x1E }, (byte)0x9, (byte)8, (byte)12)]
-		[DataRow(new byte[] { 0xFA, 0x1E }, (byte)0xA, (byte)23, (byte)35)]
-		[DataRow(new byte[] { 0xFB, 0x1E }, (byte)0xB, (byte)10, (byte)20)]
-		[DataRow(new byte[] { 0xFC, 0x1E }, (byte)0xC, (byte)123, (byte)234)]
-		[DataRow(new byte[] { 0xFD, 0x1E }, (byte)0xD, (byte)76, (byte)34)]
-		[DataRow(new byte[] { 0xFE, 0x1E }, (byte)0xE, (byte)128, (byte)127)]
-		[DataRow(new byte[] { 0xFF, 0x1E }, (byte)0xF, (byte)45, (byte)59)]
-		public void GivenInstructionFX1E_WhenExecuteProgram_ShouldSumIndexRegisterWithVX(byte[] instruction, byte x, byte initialIndexValue, byte initialVxValue)
+		[DataRow(new byte[] { 0xF0, 0x1E }, (byte)0x0, (ushort)1, (byte)2)]
+		[DataRow(new byte[] { 0xF1, 0x1E }, (byte)0x1, (ushort)0, (byte)3)]
+		[DataRow(new byte[] { 0xF2, 0x1E }, (byte)0x2, (ushort)4, (byte)0)]
+		[DataRow(new byte[] { 0xF3, 0x1E }, (byte)0x3, (ushort)255, (byte)255)]
+		[DataRow(new byte[] { 0xF4, 0x1E }, (byte)0x4, (ushort)5, (byte)6)]
+		[DataRow(new byte[] { 0xF5, 0x1E }, (byte)0x5, (ushort)10, (byte)10)]
+		[DataRow(new byte[] { 0xF6, 0x1E }, (byte)0x6, (ushort)255, (byte)0)]
+		[DataRow(new byte[] { 0xF7, 0x1E }, (byte)0x7, (ushort)65280, (byte)255)]
+		[DataRow(new byte[] { 0xF8, 0x1E }, (byte)0x8, (ushort)0, (byte)0)]
+		[DataRow(new byte[] { 0xF9, 0x1E }, (byte)0x9, (ushort)8, (byte)12)]
+		[DataRow(new byte[] { 0xFA, 0x1E }, (byte)0xA, (ushort)23, (byte)35)]
+		[DataRow(new byte[] { 0xFB, 0x1E }, (byte)0xB, (ushort)10, (byte)20)]
+		[DataRow(new byte[] { 0xFC, 0x1E }, (byte)0xC, (ushort)1234, (byte)234)]
+		[DataRow(new byte[] { 0xFD, 0x1E }, (byte)0xD, (ushort)76, (byte)34)]
+		[DataRow(new byte[] { 0xFE, 0x1E }, (byte)0xE, (ushort)1285, (byte)127)]
+		[DataRow(new byte[] { 0xFF, 0x1E }, (byte)0xF, (ushort)45, (byte)59)]
+		public void GivenInstructionFX1E_WhenExecuteProgram_ShouldSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -929,6 +930,60 @@ namespace ChipTests
 
 			// Then
 			CollectionAssert.AreEqual(expectedResult, new ArraySegment<byte>(emulator.State.Memory, initialIndexValue, 3).ToArray());
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xF0, 0x55 }, (byte)0x0, (ushort)0x202)]
+		[DataRow(new byte[] { 0xF9, 0x55 }, (byte)0x9, (ushort)0xABC)]
+		[DataRow(new byte[] { 0xFF, 0x55 }, (byte)0xF, (ushort)0xFF0)]
+		public void GivenInstructionFX55_WhenExecuteProgram_StoreValuesOfRegistersV0ToVXInMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
+		{
+			// Given
+			int valuesCount = x + 1;
+			byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
+
+			var emulator = new Emulator();
+			emulator.LoadProgram(instruction);
+
+			emulator.State.Registers.I = initialIndexValue;
+			for (int i = 0; i <= x; ++i)
+			{
+				emulator.State.Registers.V[i] = expectedRegisterValues[i];
+			}
+
+			// When
+			emulator.ProcessNextMachineCycle();
+
+			// Then
+			CollectionAssert.AreEqual(expectedRegisterValues, new ArraySegment<byte>(emulator.State.Memory, initialIndexValue, valuesCount).ToArray());
+			Assert.AreEqual(initialIndexValue + valuesCount, emulator.State.Registers.I);
+		}
+
+		[TestMethod]
+		[DataRow(new byte[] { 0xF0, 0x65 }, (byte)0x0, (ushort)0x202)]
+		[DataRow(new byte[] { 0xF9, 0x65 }, (byte)0x9, (ushort)0xABC)]
+		[DataRow(new byte[] { 0xFF, 0x65 }, (byte)0xF, (ushort)0xFF0)]
+		public void GivenInstructionFX65_WhenExecuteProgram_LoadValuesOfRegistersV0ToVXFromMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
+		{
+			// Given
+			int valuesCount = x + 1;
+			byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
+
+			var emulator = new Emulator();
+			emulator.LoadProgram(instruction);
+
+			emulator.State.Registers.I = initialIndexValue;
+			for (int i = 0; i <= x; ++i)
+			{
+				emulator.State.Memory[initialIndexValue + i] = expectedRegisterValues[i];
+			}
+
+			// When
+			emulator.ProcessNextMachineCycle();
+
+			// Then
+			CollectionAssert.AreEqual(expectedRegisterValues, new ArraySegment<byte>(emulator.State.Registers.V, 0, valuesCount).ToArray());
+			Assert.AreEqual(initialIndexValue + valuesCount, emulator.State.Registers.I);
 		}
 	}
 }
