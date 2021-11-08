@@ -55,7 +55,9 @@ namespace Chip
 
 			return instruction.Nibbles switch
 			{
+				(0x0000, 0x0000, 0x00E0, 0x000E) => ReturnFromSubroutine(),
 				(0x1000, _, _, _) => instruction.Address,
+				(0x2000, _, _, _) => CallSubroutine(instruction.Address),
 				(0x3000, _, _, _) => SkipNextOnEqual(instruction.VXIndex, instruction.Value),
 				(0x4000, _, _, _) => SkipNextOnNotEqual(instruction.VXIndex, instruction.Value),
 				(0x5000, _, _, 0x0000) => SkipNextOnRegistersEqual(instruction.VXIndex, instruction.VYIndex),
@@ -83,6 +85,14 @@ namespace Chip
 			};
 		}
 
+		private ushort CallSubroutine(ushort subroutineAddress)
+		{
+			State.Stack.Push(GetNextInstructionAddress());
+			return subroutineAddress;
+		}
+
+		private ushort ReturnFromSubroutine() => State.Stack.Pop();
+
 		private ushort LoadRegistersInBulk(int x)
 		{
 			for (int i = 0; i <= x; ++i)
@@ -92,7 +102,7 @@ namespace Chip
 				++State.Registers.I;
 			}
 
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort StoreRegistersInBulk(int x)
@@ -104,7 +114,7 @@ namespace Chip
 				++State.Registers.I;
 			}
 
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort StoreVxAsBinaryCodedDecimal(int x)
@@ -119,19 +129,19 @@ namespace Chip
 			State.Memory[index + 1] = (byte)(State.Registers.V[x] / 10 % 10);
 			State.Memory[index + 2] = (byte)(State.Registers.V[x] % 10);
 
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort SetIndexRegisterToCharacterSpriteAddress(int x)
 		{
 			State.Registers.I = (ushort)((State.Registers.V[x] % CharacterSprites.CharactersCount) * CharacterSprites.CharacterSize);
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort AddVxToIndexRegister(int x)
 		{
 			State.Registers.I += State.Registers.V[x];
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort LeftBitShift(int x, int y)
@@ -139,7 +149,7 @@ namespace Chip
 			byte mostSignificantBit = (byte)((State.Registers.V[y] & 0b10000000) >> 7);
 			State.Registers.V[x] = (byte)(State.Registers.V[y] << 1);
 			State.Registers.V[0xF] = mostSignificantBit;
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort RightBitShift(int x, int y)
@@ -147,7 +157,7 @@ namespace Chip
 			byte leastSignificantBit = (byte)(State.Registers.V[y] & 1);
 			State.Registers.V[x] = (byte)(State.Registers.V[y] >> 1);
 			State.Registers.V[0xF] = leastSignificantBit;
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort ReversedSubtractWithBorrow(int x, int y)
@@ -155,7 +165,7 @@ namespace Chip
 			byte notBorrowFlag = (byte)(State.Registers.V[y] >= State.Registers.V[x] ? 1 : 0);
 			State.Registers.V[x] = (byte)(State.Registers.V[y] - State.Registers.V[x]);
 			State.Registers.V[0xF] = notBorrowFlag;
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort SubtractWithBorrow(int x, int y)
@@ -163,7 +173,7 @@ namespace Chip
 			byte notBorrowFlag = (byte)(State.Registers.V[x] >= State.Registers.V[y] ? 1 : 0);
 			State.Registers.V[x] = (byte)(State.Registers.V[x] - State.Registers.V[y]);
 			State.Registers.V[0xF] = notBorrowFlag;
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort AddWithCarry(int x, int y)
@@ -171,79 +181,85 @@ namespace Chip
 			int result = State.Registers.V[y] + State.Registers.V[x];
 			State.Registers.V[x] = (byte)result;
 			State.Registers.V[0xF] = (byte)(result > byte.MaxValue ? 1 : 0);
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort ApplyVxXorVy(int x, int y)
 		{
 			State.Registers.V[x] ^= State.Registers.V[y];
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort ApplyVxAndVy(int x, int y)
 		{
 			State.Registers.V[x] &= State.Registers.V[y];
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort ApplyVxOrVy(int x, int y)
 		{
 			State.Registers.V[x] |= State.Registers.V[y];
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort CopyRegisterVyToRegisterVx(int x, int y)
 		{
 			State.Registers.V[x] = State.Registers.V[y];
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort AddValueToRegister(int x, byte value)
 		{
 			State.Registers.V[x] += value;
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort LoadValueToRegister(int x, byte value)
 		{
 			State.Registers.V[x] = value;
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort SkipNextOnEqual(int x, byte valueToCompare)
 		{
 			int offset = State.Registers.V[x] == valueToCompare ? InstructionSize * 2 : InstructionSize;
-			return (ushort)(State.Registers.PC + offset);
+			return GetNextInstructionAddress(offset);
 		}
 
 		private ushort SkipNextOnNotEqual(int x, byte valueToCompare)
 		{
 			int offset = State.Registers.V[x] != valueToCompare ? InstructionSize * 2 : InstructionSize;
-			return (ushort)(State.Registers.PC + offset);
+			return GetNextInstructionAddress(offset);
 		}
 
 		private ushort SkipNextOnRegistersEqual(int x, int y)
 		{
 			int offset = State.Registers.V[x] == State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
-			return (ushort)(State.Registers.PC + offset);
+			return GetNextInstructionAddress(offset);
 		}
 
 		private ushort SkipNextOnRegistersNotEqual(int x, int y)
 		{
 			int offset = State.Registers.V[x] != State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
-			return (ushort)(State.Registers.PC + offset);
+			return GetNextInstructionAddress(offset);
 		}
 
 		private ushort LoadAddressToIndexRegister(ushort address)
 		{
 			State.Registers.I = address;
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
 
 		private ushort SetRandomValueWithMaskOnVx(int x, byte mask)
 		{
 			State.Registers.V[x] = (byte)(_randomGenerator.Generate() & mask);
-			return (ushort)(State.Registers.PC + InstructionSize);
+			return GetNextInstructionAddress();
 		}
+
+		private ushort GetNextInstructionAddress(int offset)
+			=> (ushort)(State.Registers.PC + offset);
+
+		private ushort GetNextInstructionAddress() 
+			=> GetNextInstructionAddress(InstructionSize);
 	}
 }
