@@ -54,6 +54,25 @@ namespace ChipTests
 		}
 
 		[TestMethod]
+		public void GivenInstruction00EEAndNotEmptyStack_WhenExecuteInstruction_ThenPopAddressFromStackAndLoadItToProgramCounter()
+		{
+			// Given
+			byte[] instruction = { 0x00, 0xEE };
+			ushort expectedResult = 0xABC;
+
+			var emulator = new Emulator();
+			emulator.LoadProgram(instruction);
+			emulator.State.Stack.Push(expectedResult);
+
+			// When
+			emulator.ProcessNextMachineCycle();
+
+			// Then
+			Assert.AreEqual(0, emulator.State.Stack.Count);
+			Assert.AreEqual(expectedResult, emulator.State.Registers.PC);
+		}
+
+		[TestMethod]
 		[DataRow(new byte[] { 0x10, 0x00 }, (ushort)0x000)]
 		[DataRow(new byte[] { 0x12, 0x34 }, (ushort)0x234)]
 		[DataRow(new byte[] { 0x1F, 0xFF }, (ushort)0xFFF)]
@@ -68,6 +87,26 @@ namespace ChipTests
 
 			// Then
 			Assert.AreEqual(expectedResult, emulator.State.Registers.PC);
+		}
+
+		[TestMethod]
+		public void GivenInstruction2NNN_WhenExecuteInstruction_ThenPushNextInstructionAddressToTheStackAndJumpToAddressNNN()
+		{
+			// Given
+			byte[] instruction = { 0x2F, 0xFF };
+			ushort addressToJump = 0xFFF;
+			ushort nextInstructionAddress = Default.StartAddress + 2;
+
+			var emulator = new Emulator();
+			emulator.LoadProgram(instruction);
+
+			// When
+			emulator.ProcessNextMachineCycle();
+
+			// Then
+			Assert.AreEqual(1, emulator.State.Stack.Count);
+			Assert.AreEqual(nextInstructionAddress, emulator.State.Stack.Peek());
+			Assert.AreEqual(addressToJump, emulator.State.Registers.PC);
 		}
 
 		[TestMethod]
@@ -87,7 +126,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x3D, 0xDD }, 0xD, (byte)0xDD)]
 		[DataRow(new byte[] { 0x3E, 0xEE }, 0xE, (byte)0xEE)]
 		[DataRow(new byte[] { 0x3F, 0xFF }, 0xF, (byte)0xFF)]
-		public void GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteProgram_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -118,7 +157,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x3D, 0xDD }, 0xD, (byte)0xDF)]
 		[DataRow(new byte[] { 0x3E, 0xEE }, 0xE, (byte)0xF0)]
 		[DataRow(new byte[] { 0x3F, 0xFF }, 0xF, (byte)0xF1)]
-		public void GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteProgram_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -149,7 +188,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x4D, 0xDD }, 0xD, (byte)0xDF)]
 		[DataRow(new byte[] { 0x4E, 0xEE }, 0xE, (byte)0xF0)]
 		[DataRow(new byte[] { 0x4F, 0xFF }, 0xF, (byte)0xF1)]
-		public void GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteProgram_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -180,7 +219,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x4D, 0xDD }, 0xD, (byte)0xDD)]
 		[DataRow(new byte[] { 0x4E, 0xEE }, 0xE, (byte)0xEE)]
 		[DataRow(new byte[] { 0x4F, 0xFF }, 0xF, (byte)0xFF)]
-		public void GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteProgram_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
+		public void GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -211,7 +250,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x5D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0xDD)]
 		[DataRow(new byte[] { 0x5E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0xEE)]
 		[DataRow(new byte[] { 0x5F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0xFF)]
-		public void GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteProgram_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+		public void GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -243,7 +282,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x5D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0x22)]
 		[DataRow(new byte[] { 0x5E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0x11)]
 		[DataRow(new byte[] { 0x5F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0x00)]
-		public void GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteProgram_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+		public void GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -275,7 +314,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x6D, 0xDE }, 0xD, (byte)0xDE)]
 		[DataRow(new byte[] { 0x6E, 0xEF }, 0xE, (byte)0xEF)]
 		[DataRow(new byte[] { 0x6F, 0xFF }, 0xF, (byte)0xFF)]
-		public void GivenInstruction6XNN_WhenExecuteProgram_ThenLoadNNToRegisterVX(byte[] instruction, int x, byte expectedValue)
+		public void GivenInstruction6XNN_WhenExecuteInstruction_ThenLoadNNToRegisterVX(byte[] instruction, int x, byte expectedValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -305,7 +344,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x7D, 0xD1 }, 0xD, (byte)0x1D, (byte)0xEE)]
 		[DataRow(new byte[] { 0x7E, 0xE2 }, 0xE, (byte)0x0F, (byte)0xF1)]
 		[DataRow(new byte[] { 0x7F, 0xF0 }, 0xF, (byte)0x0F, (byte)0xFF)]
-		public void GivenInstruction7XNN_WhenExecuteProgram_ThenAddNNToRegisterVX(byte[] instruction, int x, byte initialRegisterValue, byte expectedValue)
+		public void GivenInstruction7XNN_WhenExecuteInstruction_ThenAddNNToRegisterVX(byte[] instruction, int x, byte initialRegisterValue, byte expectedValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -336,7 +375,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8D, 0x20 }, 0xD, 0x2, (byte)0x1D)]
 		[DataRow(new byte[] { 0x8E, 0x10 }, 0xE, 0x1, (byte)0x0F)]
 		[DataRow(new byte[] { 0x8F, 0x00 }, 0xF, 0x0, (byte)0xFF)]
-		public void GivenInstruction8XY0_WhenExecuteProgram_ThenLoadValueOfRegisterVYIntoRegisterVX(byte[] instruction, int x, int y, byte initialRegisterValue)
+		public void GivenInstruction8XY0_WhenExecuteInstruction_ThenLoadValueOfRegisterVYIntoRegisterVX(byte[] instruction, int x, int y, byte initialRegisterValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -367,7 +406,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8D, 0x21 }, 0xD, 0x2, (byte)0b00001010, (byte)0b01010000)]
 		[DataRow(new byte[] { 0x8E, 0x11 }, 0xE, 0x1, (byte)0b00001010, (byte)0b00000101)]
 		[DataRow(new byte[] { 0x8F, 0x01 }, 0xF, 0x0, (byte)0b11111111, (byte)0b11111111)]
-		public void GivenInstruction8XY1_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToVXOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY1_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -399,7 +438,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8D, 0x22 }, 0xD, 0x2, (byte)0b00001010, (byte)0b01010000)]
 		[DataRow(new byte[] { 0x8E, 0x12 }, 0xE, 0x1, (byte)0b00001010, (byte)0b00000101)]
 		[DataRow(new byte[] { 0x8F, 0x02 }, 0xF, 0x0, (byte)0b11111111, (byte)0b11111111)]
-		public void GivenInstruction8XY2_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToVXAndVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY2_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXAndVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -431,7 +470,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8D, 0x23 }, 0xD, 0x2, (byte)0b00001010, (byte)0b01010000)]
 		[DataRow(new byte[] { 0x8E, 0x13 }, 0xE, 0x1, (byte)0b00001010, (byte)0b00000101)]
 		[DataRow(new byte[] { 0x8F, 0x03 }, 0xF, 0x0, (byte)0b11111111, (byte)0b11111111)]
-		public void GivenInstruction8XY3_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToVXExclusiveOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY3_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXExclusiveOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -462,7 +501,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x34 }, 0xC, 0x3, (byte)25, (byte)3)]
 		[DataRow(new byte[] { 0x8D, 0x24 }, 0xD, 0x2, (byte)5, (byte)7)]
 		[DataRow(new byte[] { 0x8E, 0x14 }, 0xE, 0x1, (byte)200, (byte)55)]
-		public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesLessOrEqual255_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesLessOrEqual255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -494,7 +533,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x34 }, 0xC, 0x3, (byte)25, (byte)255)]
 		[DataRow(new byte[] { 0x8D, 0x24 }, 0xD, 0x2, (byte)255, (byte)7)]
 		[DataRow(new byte[] { 0x8E, 0x14 }, 0xE, 0x1, (byte)255, (byte)8)]
-		public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesGreaterThan255_WhenExecuteProgram_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesGreaterThan255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -526,7 +565,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x35 }, 0xC, 0x3, (byte)73, (byte)57)]
 		[DataRow(new byte[] { 0x8D, 0x25 }, 0xD, 0x2, (byte)66, (byte)28)]
 		[DataRow(new byte[] { 0x8E, 0x15 }, 0xE, 0x1, (byte)85, (byte)33)]
-		public void GivenInstruction8XY5AndRegisterValueVXGreaterOrEqualVY_WhenExecuteProgram_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY5AndRegisterValueVXGreaterOrEqualVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -558,7 +597,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x35 }, 0xC, 0x3, (byte)7, (byte)57)]
 		[DataRow(new byte[] { 0x8D, 0x25 }, 0xD, 0x2, (byte)66, (byte)90)]
 		[DataRow(new byte[] { 0x8E, 0x15 }, 0xE, 0x1, (byte)85, (byte)123)]
-		public void GivenInstruction8XY5AndRegisterValuesVYGreaterThanVX_WhenExecuteProgram_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY5AndRegisterValuesVYGreaterThanVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -590,7 +629,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x36 }, 0xC, 0x3, (byte)0b01010101, (byte)0b00101010, (byte)1)]
 		[DataRow(new byte[] { 0x8D, 0x26 }, 0xD, 0x2, (byte)0b11111110, (byte)0b01111111, (byte)0)]
 		[DataRow(new byte[] { 0x8E, 0x16 }, 0xE, 0x1, (byte)0b11111111, (byte)0b01111111, (byte)1)]
-		public void GivenInstruction8XY6_WhenExecuteProgram_ThenStoreVYWithBitsShiftedRightInVXAndStoreLeastSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
+		public void GivenInstruction8XY6_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedRightInVXAndStoreLeastSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -621,7 +660,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x37 }, 0xC, 0x3, (byte)5, (byte)55)]
 		[DataRow(new byte[] { 0x8D, 0x27 }, 0xD, 0x2, (byte)2, (byte)68)]
 		[DataRow(new byte[] { 0x8E, 0x17 }, 0xE, 0x1, (byte)42, (byte)54)]
-		public void GivenInstruction8XY7AndRegisterValueVYGreaterOrEqualVX_WhenExecuteProgram_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY7AndRegisterValueVYGreaterOrEqualVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -653,7 +692,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x37 }, 0xC, 0x3, (byte)57, (byte)7)]
 		[DataRow(new byte[] { 0x8D, 0x27 }, 0xD, 0x2, (byte)90, (byte)66)]
 		[DataRow(new byte[] { 0x8E, 0x17 }, 0xE, 0x1, (byte)123, (byte)85)]
-		public void GivenInstruction8XY7AndRegisterValuesVXGreaterThanVY_WhenExecuteProgram_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+		public void GivenInstruction8XY7AndRegisterValuesVXGreaterThanVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -685,7 +724,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x8C, 0x3E }, 0xC, 0x3, (byte)0b00101010, (byte)0b01010100, (byte)0)]
 		[DataRow(new byte[] { 0x8D, 0x2E }, 0xD, 0x2, (byte)0b01111111, (byte)0b11111110, (byte)0)]
 		[DataRow(new byte[] { 0x8E, 0x1E }, 0xE, 0x1, (byte)0b11111111, (byte)0b11111110, (byte)1)]
-		public void GivenInstruction8XYE_WhenExecuteProgram_ThenStoreVYWithBitsShiftedLeftInVXAndStoreMostSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
+		public void GivenInstruction8XYE_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedLeftInVXAndStoreMostSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -717,7 +756,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x9D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0x22)]
 		[DataRow(new byte[] { 0x9E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0x11)]
 		[DataRow(new byte[] { 0x9F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0x00)]
-		public void GivenInstruction9XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteProgram_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+		public void GivenInstruction9XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -749,7 +788,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0x9D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0xDD)]
 		[DataRow(new byte[] { 0x9E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0xEE)]
 		[DataRow(new byte[] { 0x9F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0xFF)]
-		public void GivenInstruction9XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteProgram_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+		public void GivenInstruction9XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -768,7 +807,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xA0, 0x00 }, (ushort)0x000)]
 		[DataRow(new byte[] { 0xA1, 0x23 }, (ushort)0x123)]
 		[DataRow(new byte[] { 0xAF, 0xFF }, (ushort)0xFFF)]
-		public void GivenInstructionANNN_WhenExecuteProgram_ThenStoreAddressNNNInIndexRegister(byte[] instruction, ushort expectedResult)
+		public void GivenInstructionANNN_WhenExecuteInstruction_ThenStoreAddressNNNInIndexRegister(byte[] instruction, ushort expectedResult)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -787,7 +826,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xB0, 0x00 }, (byte)0xEF, (ushort)0x00EF)]
 		[DataRow(new byte[] { 0xB1, 0x23 }, (byte)0x45, (ushort)0x0168)]
 		[DataRow(new byte[] { 0xBF, 0xFF }, (byte)0xFF, (ushort)0x10FE)]
-		public void GivenInstructionBNNN_WhenExecuteProgram_ProgramShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
+		public void GivenInstructionBNNN_WhenExecuteInstruction_ProgramShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -818,7 +857,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xCD, 0b11111000 }, (byte)0x0D, (byte)0b00011000, (byte)0b00011000)]
 		[DataRow(new byte[] { 0xCE, 0b00011000 }, (byte)0x0E, (byte)0b11111000, (byte)0b00011000)]
 		[DataRow(new byte[] { 0xCF, 0b01010101 }, (byte)0x0F, (byte)0b10101010, (byte)0x00)]
-		public void GivenInstructionCXNN_WhenExecuteProgram_ShouldSetVXToRandomNumberWithMaskNN(byte[] instruction, byte x, byte randomValue, ushort expectedResult)
+		public void GivenInstructionCXNN_WhenExecuteInstruction_ShouldSetVXToRandomNumberWithMaskNN(byte[] instruction, byte x, byte randomValue, ushort expectedResult)
 		{
 			// Given
 			var randomGenerator = Substitute.For<IRandomGenerator>();
@@ -851,7 +890,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xFD, 0x1E }, (byte)0xD, (ushort)76, (byte)34)]
 		[DataRow(new byte[] { 0xFE, 0x1E }, (byte)0xE, (ushort)1285, (byte)127)]
 		[DataRow(new byte[] { 0xFF, 0x1E }, (byte)0xF, (ushort)45, (byte)59)]
-		public void GivenInstructionFX1E_WhenExecuteProgram_ShouldSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
+		public void GivenInstructionFX1E_WhenExecuteInstruction_ShouldSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -884,7 +923,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xFE, 0x29 }, (byte)0xE, (byte)0x1, (ushort)5)]
 		[DataRow(new byte[] { 0xFF, 0x29 }, (byte)0xF, (byte)0x0, (ushort)0)]
 		[DataRow(new byte[] { 0xFF, 0x29 }, (byte)0xF, (byte)0x18, (ushort)40)]
-		public void GivenInstructionFX29_WhenExecuteProgram_SetIndexRegisterToCharacterSpriteAddressOfLowestSignificantDigitInVXValue(byte[] instruction, byte x, byte initialVxValue, ushort expectedValue)
+		public void GivenInstructionFX29_WhenExecuteInstruction_SetIndexRegisterToCharacterSpriteAddressOfLowestSignificantDigitInVXValue(byte[] instruction, byte x, byte initialVxValue, ushort expectedValue)
 		{
 			// Given
 			var emulator = new Emulator();
@@ -915,7 +954,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xFD, 0x33 }, (byte)0xD, (byte)74, new byte[] { 0, 7, 4 })]
 		[DataRow(new byte[] { 0xFE, 0x33 }, (byte)0xE, (byte)15, new byte[] { 0, 1, 5 })]
 		[DataRow(new byte[] { 0xFF, 0x33 }, (byte)0xF, (byte)0, new byte[] { 0, 0, 0 })]
-		public void GivenInstructionFX33_WhenExecuteProgram_StoreValueOfVXInMemoryAsBinaryCodedDecimal(byte[] instruction, byte x, byte initialVxValue, byte[] expectedResult)
+		public void GivenInstructionFX33_WhenExecuteInstruction_StoreValueOfVXInMemoryAsBinaryCodedDecimal(byte[] instruction, byte x, byte initialVxValue, byte[] expectedResult)
 		{
 			// Given
 			const ushort initialIndexValue = 0x300;
@@ -936,7 +975,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xF0, 0x55 }, (byte)0x0, (ushort)0x202)]
 		[DataRow(new byte[] { 0xF9, 0x55 }, (byte)0x9, (ushort)0xABC)]
 		[DataRow(new byte[] { 0xFF, 0x55 }, (byte)0xF, (ushort)0xFF0)]
-		public void GivenInstructionFX55_WhenExecuteProgram_StoreValuesOfRegistersV0ToVXInMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
+		public void GivenInstructionFX55_WhenExecuteInstruction_StoreValuesOfRegistersV0ToVXInMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
 		{
 			// Given
 			int valuesCount = x + 1;
@@ -963,7 +1002,7 @@ namespace ChipTests
 		[DataRow(new byte[] { 0xF0, 0x65 }, (byte)0x0, (ushort)0x202)]
 		[DataRow(new byte[] { 0xF9, 0x65 }, (byte)0x9, (ushort)0xABC)]
 		[DataRow(new byte[] { 0xFF, 0x65 }, (byte)0xF, (ushort)0xFF0)]
-		public void GivenInstructionFX65_WhenExecuteProgram_LoadValuesOfRegistersV0ToVXFromMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
+		public void GivenInstructionFX65_WhenExecuteInstruction_LoadValuesOfRegistersV0ToVXFromMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
 		{
 			// Given
 			int valuesCount = x + 1;
