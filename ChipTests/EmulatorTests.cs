@@ -1,5 +1,6 @@
 ﻿using Chip;
 using Chip.Exceptions;
+using Chip.Output;
 using Chip.Random;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -11,12 +12,21 @@ namespace ChipTests
 	[TestClass]
 	public class EmulatorTests
 	{
+		private static ISound _mockedSound;
+
+		[ClassInitialize]
+		public static void SetupTestMocks(TestContext context)
+		{
+			_mockedSound = Substitute.For<ISound>();
+		}
+
+
 		[TestMethod]
 		public void GivenNonNullProgram_WhenTryingToLoadIt_ThenShouldLoadProgramProperly()
 		{
 			// Given
 			var program = new byte[] { 0x00, 0xE0 };
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 
 			// When
 			emulator.LoadProgram(program);
@@ -34,7 +44,7 @@ namespace ChipTests
 			byte[] program = null;
 
 			// When
-			void action() => new Emulator().LoadProgram(program);
+			void action() => new Emulator(_mockedSound).LoadProgram(program);
 
 			// Then
 			Assert.ThrowsException<ArgumentNullException>(action);
@@ -47,7 +57,7 @@ namespace ChipTests
 			byte[] program = new byte[3585];
 
 			// When
-			void action() => new Emulator().LoadProgram(program);
+			void action() => new Emulator(_mockedSound).LoadProgram(program);
 
 			// Then
 			Assert.ThrowsException<InvalidChipProgramException>(action);
@@ -60,7 +70,7 @@ namespace ChipTests
 			byte[] instruction = { 0x00, 0xEE };
 			ushort expectedResult = 0xABC;
 
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Stack.Push(expectedResult);
 
@@ -79,7 +89,7 @@ namespace ChipTests
 		public void GivenInstruction1NNN_WhenExecuteInstruction_ThenProgramShouldJumpToAddressNNN(byte[] instruction, ushort expectedResult)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 
 			// When
@@ -97,7 +107,7 @@ namespace ChipTests
 			ushort addressToJump = 0xFFF;
 			ushort nextInstructionAddress = Default.StartAddress + 2;
 
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 
 			// When
@@ -129,7 +139,7 @@ namespace ChipTests
 		public void GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = value;
 
@@ -160,7 +170,7 @@ namespace ChipTests
 		public void GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = value;
 
@@ -191,7 +201,7 @@ namespace ChipTests
 		public void GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = value;
 
@@ -222,7 +232,7 @@ namespace ChipTests
 		public void GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = value;
 
@@ -253,7 +263,7 @@ namespace ChipTests
 		public void GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = vxValue;
 			emulator.State.Registers.V[y] = vyValue;
@@ -285,7 +295,7 @@ namespace ChipTests
 		public void GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = vxValue;
 			emulator.State.Registers.V[y] = vyValue;
@@ -317,7 +327,7 @@ namespace ChipTests
 		public void GivenInstruction6XNN_WhenExecuteInstruction_ThenLoadNNToRegisterVX(byte[] instruction, int x, byte expectedValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 
 			// When
@@ -347,7 +357,7 @@ namespace ChipTests
 		public void GivenInstruction7XNN_WhenExecuteInstruction_ThenAddNNToRegisterVX(byte[] instruction, int x, byte initialRegisterValue, byte expectedValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterValue;
 
@@ -378,7 +388,7 @@ namespace ChipTests
 		public void GivenInstruction8XY0_WhenExecuteInstruction_ThenLoadValueOfRegisterVYIntoRegisterVX(byte[] instruction, int x, int y, byte initialRegisterValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[y] = initialRegisterValue;
 
@@ -409,7 +419,7 @@ namespace ChipTests
 		public void GivenInstruction8XY1_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -441,7 +451,7 @@ namespace ChipTests
 		public void GivenInstruction8XY2_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXAndVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -473,7 +483,7 @@ namespace ChipTests
 		public void GivenInstruction8XY3_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXExclusiveOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -504,7 +514,7 @@ namespace ChipTests
 		public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesLessOrEqual255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -536,7 +546,7 @@ namespace ChipTests
 		public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesGreaterThan255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -568,7 +578,7 @@ namespace ChipTests
 		public void GivenInstruction8XY5AndRegisterValueVXGreaterOrEqualVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -600,7 +610,7 @@ namespace ChipTests
 		public void GivenInstruction8XY5AndRegisterValuesVYGreaterThanVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -632,7 +642,7 @@ namespace ChipTests
 		public void GivenInstruction8XY6_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedRightInVXAndStoreLeastSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -663,7 +673,7 @@ namespace ChipTests
 		public void GivenInstruction8XY7AndRegisterValueVYGreaterOrEqualVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -695,7 +705,7 @@ namespace ChipTests
 		public void GivenInstruction8XY7AndRegisterValuesVXGreaterThanVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialRegisterXValue;
 			emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -727,7 +737,7 @@ namespace ChipTests
 		public void GivenInstruction8XYE_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedLeftInVXAndStoreMostSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -759,7 +769,7 @@ namespace ChipTests
 		public void GivenInstruction9XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = vxValue;
 			emulator.State.Registers.V[y] = vyValue;
@@ -791,7 +801,7 @@ namespace ChipTests
 		public void GivenInstruction9XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = vxValue;
 			emulator.State.Registers.V[y] = vyValue;
@@ -810,7 +820,7 @@ namespace ChipTests
 		public void GivenInstructionANNN_WhenExecuteInstruction_ThenStoreAddressNNNInIndexRegister(byte[] instruction, ushort expectedResult)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 
 			// When
@@ -829,7 +839,7 @@ namespace ChipTests
 		public void GivenInstructionBNNN_WhenExecuteInstruction_ProgramShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[0] = initialRegisterValue;
 
@@ -863,7 +873,7 @@ namespace ChipTests
 			var randomGenerator = Substitute.For<IRandomGenerator>();
 			randomGenerator.Generate().Returns(randomValue);
 
-			var emulator = new Emulator(randomGenerator);
+			var emulator = new Emulator(_mockedSound, randomGenerator);
 			emulator.LoadProgram(instruction);
 
 			// When
@@ -893,7 +903,7 @@ namespace ChipTests
 		public void GivenInstructionFX1E_WhenExecuteInstruction_ShouldSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.I = initialIndexValue;
 			emulator.State.Registers.V[x] = initialVxValue;
@@ -926,7 +936,7 @@ namespace ChipTests
 		public void GivenInstructionFX29_WhenExecuteInstruction_SetIndexRegisterToCharacterSpriteAddressOfLowestSignificantDigitInVXValue(byte[] instruction, byte x, byte initialVxValue, ushort expectedValue)
 		{
 			// Given
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialVxValue;
 
@@ -959,7 +969,7 @@ namespace ChipTests
 			// Given
 			const ushort initialIndexValue = 0x300;
 
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 			emulator.State.Registers.V[x] = initialVxValue;
 			emulator.State.Registers.I = initialIndexValue;
@@ -981,7 +991,7 @@ namespace ChipTests
 			int valuesCount = x + 1;
 			byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 
 			emulator.State.Registers.I = initialIndexValue;
@@ -1008,7 +1018,7 @@ namespace ChipTests
 			int valuesCount = x + 1;
 			byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
-			var emulator = new Emulator();
+			var emulator = new Emulator(_mockedSound);
 			emulator.LoadProgram(instruction);
 
 			emulator.State.Registers.I = initialIndexValue;

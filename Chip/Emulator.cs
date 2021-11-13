@@ -1,4 +1,6 @@
 ﻿using Chip.Exceptions;
+using Chip.Input;
+using Chip.Output;
 using Chip.Random;
 using System;
 
@@ -8,13 +10,23 @@ namespace Chip
 	{
 		private const int InstructionSize = 2;
 
-		internal MachineState State { get; private set; } = new();
-
 		private readonly IRandomGenerator _randomGenerator;
 
-		public Emulator() => _randomGenerator = new RandomGenerator();
+		internal MachineState State { get; private set; } = new();
 
-		internal Emulator(IRandomGenerator randomGenerator) => _randomGenerator = randomGenerator;
+		public Keypad Keypad { get; private set; }
+
+		public Emulator(ISound sound)
+		{
+			Keypad = new Keypad(sound);
+			_randomGenerator = new RandomGenerator();
+		}
+
+		internal Emulator(ISound sound, IRandomGenerator randomGenerator)
+		{
+			Keypad = new Keypad(sound);
+			_randomGenerator = randomGenerator;
+		}
 
 		public void LoadProgram(byte[] program)
 		{
@@ -77,6 +89,9 @@ namespace Chip
 				(0xA000, _, _, _) => LoadAddressToIndexRegister(instruction.Address),
 				(0xB000, _, _, _) => (ushort)(instruction.Address + State.Registers.V[0]),
 				(0xC000, _, _, _) => SetRandomValueWithMaskOnVx(instruction.VXIndex, instruction.Value),
+				(0xE000, _, 0x0090, 0x000E) => SkipNextOnKeyPressed(instruction.VXIndex),
+				(0xE000, _, 0x00A0, 0x0001) => SkipNextOnKeyNotPressed(instruction.VXIndex),
+				(0xF000, _, 0x0000, 0x000A) => WaitForKeyPress(instruction.VXIndex),
 				(0xF000, _, 0x0010, 0x000E) => AddVxToIndexRegister(instruction.VXIndex),
 				(0xF000, _, 0x0020, 0x0009) => SetIndexRegisterToCharacterSpriteAddress(instruction.VXIndex),
 				(0xF000, _, 0x0030, 0x0003) => StoreVxAsBinaryCodedDecimal(instruction.VXIndex),
@@ -85,6 +100,30 @@ namespace Chip
 				_ => throw new ChipProgramExecutionException($"Unrecognized instruction.")
 			};
 		}
+
+		private ushort WaitForKeyPress(int x)
+		{
+			Keypad.EnableCaptureSingleKeyMode();
+			if (Keypad.CapturedKey.HasValue)
+			{
+				var keyCode = (byte)Keypad.CapturedKey.Value;
+				State.Registers.V[x] = keyCode;
+				if (!Keypad.IsKeyPressed(keyCode))
+				{
+					Keypad.DisableCaptureSingleKeyMode();
+					return GetNextInstructionAddress();
+				}
+			}
+			return State.Registers.PC;
+		}
+
+		private ushort SkipNextOnKeyNotPressed(int x)
+			 => !IsVxValueDownOnKeyboard(x) ? GetInstructionAddress(InstructionSize * 2) : GetNextInstructionAddress();
+
+		private ushort SkipNextOnKeyPressed(int x)
+			=> IsVxValueDownOnKeyboard(x) ? GetInstructionAddress(InstructionSize * 2) : GetNextInstructionAddress();
+
+		private bool IsVxValueDownOnKeyboard(int x) => Keypad.IsKeyPressed(State.Registers.V[x] & 0x0F);
 
 		private ushort CallSubroutine(ushort subroutineAddress)
 		{
@@ -224,25 +263,25 @@ namespace Chip
 		private ushort SkipNextOnEqual(int x, byte valueToCompare)
 		{
 			int offset = State.Registers.V[x] == valueToCompare ? InstructionSize * 2 : InstructionSize;
-			return GetNextInstructionAddress(offset);
+			return GetInstructionAddress(offset);
 		}
 
 		private ushort SkipNextOnNotEqual(int x, byte valueToCompare)
 		{
 			int offset = State.Registers.V[x] != valueToCompare ? InstructionSize * 2 : InstructionSize;
-			return GetNextInstructionAddress(offset);
+			return GetInstructionAddress(offset);
 		}
 
 		private ushort SkipNextOnRegistersEqual(int x, int y)
 		{
 			int offset = State.Registers.V[x] == State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
-			return GetNextInstructionAddress(offset);
+			return GetInstructionAddress(offset);
 		}
 
 		private ushort SkipNextOnRegistersNotEqual(int x, int y)
 		{
 			int offset = State.Registers.V[x] != State.Registers.V[y] ? InstructionSize * 2 : InstructionSize;
-			return GetNextInstructionAddress(offset);
+			return GetInstructionAddress(offset);
 		}
 
 		private ushort LoadAddressToIndexRegister(ushort address)
@@ -257,10 +296,10 @@ namespace Chip
 			return GetNextInstructionAddress();
 		}
 
-		private ushort GetNextInstructionAddress(int offset)
+		private ushort GetInstructionAddress(int offset)
 			=> (ushort)(State.Registers.PC + offset);
 
-		private ushort GetNextInstructionAddress() 
-			=> GetNextInstructionAddress(InstructionSize);
+		private ushort GetNextInstructionAddress()
+			=> GetInstructionAddress(InstructionSize);
 	}
 }
