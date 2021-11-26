@@ -5,46 +5,46 @@ using NSubstitute;
 
 namespace ChipTests.EmulatorTests
 {
-	[TestClass]
-	public class SubroutineInstructionsTests
-	{
-		[TestMethod]
-		public void GivenInstruction00EEAndNotEmptyStack_WhenExecuteInstruction_ThenPopAddressFromStackAndLoadItToProgramCounter()
-		{
-			// Given
-			byte[] instruction = { 0x00, 0xEE };
-			ushort expectedResult = 0xABC;
+    [TestClass]
+    public class SubroutineInstructionsTests
+    {
+        [TestMethod]
+        public void GivenInstruction00EEAndNotEmptyStack_WhenExecuteInstruction_ThenPopAddressFromStackAndLoadItToProgramCounter()
+        {
+            // Given
+            byte[] instruction = { 0x00, 0xEE };
+            ushort expectedResult = 0xABC;
 
-			var emulator = new Emulator(Substitute.For<ISound>());
-			emulator.LoadProgram(instruction);
-			emulator.State.Stack.Push(expectedResult);
+            var emulator = new Emulator(Substitute.For<ISound>());
+            emulator.LoadProgram(instruction);
+            emulator.State.Stack.Push(expectedResult);
 
-			// When
-			emulator.ProcessNextMachineCycle();
+            // When
+            emulator.ProcessNextMachineCycle();
 
-			// Then
-			Assert.AreEqual(0, emulator.State.Stack.Count);
-			Assert.AreEqual(expectedResult, emulator.State.Registers.PC);
-		}
+            // Then
+            Assert.AreEqual(0, emulator.State.Stack.Count);
+            Assert.AreEqual(expectedResult, emulator.State.Registers.pc);
+        }
 
-		[TestMethod]
-		public void GivenInstruction2NNN_WhenExecuteInstruction_ThenPushNextInstructionAddressToTheStackAndJumpToAddressNNN()
-		{
-			// Given
-			byte[] instruction = { 0x2F, 0xFF };
-			ushort addressToJump = 0xFFF;
-			ushort nextInstructionAddress = Default.StartAddress + 2;
+        [TestMethod]
+        public void GivenInstruction2NNN_WhenExecuteInstruction_ThenPushNextInstructionAddressToTheStackAndJumpToAddressNNN()
+        {
+            // Given
+            byte[] instruction = { 0x2F, 0xFF };
+            ushort addressToJump = 0xFFF;
+            ushort nextInstructionAddress = Default.StartAddress + 2;
 
-			var emulator = new Emulator(Substitute.For<ISound>());
-			emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>());
+            emulator.LoadProgram(instruction);
 
-			// When
-			emulator.ProcessNextMachineCycle();
+            // When
+            emulator.ProcessNextMachineCycle();
 
-			// Then
-			Assert.AreEqual(1, emulator.State.Stack.Count);
-			Assert.AreEqual(nextInstructionAddress, emulator.State.Stack.Peek());
-			Assert.AreEqual(addressToJump, emulator.State.Registers.PC);
-		}
-	}
+            // Then
+            Assert.AreEqual(1, emulator.State.Stack.Count);
+            Assert.AreEqual(nextInstructionAddress, emulator.State.Stack.Peek());
+            Assert.AreEqual(addressToJump, emulator.State.Registers.pc);
+        }
+    }
 }

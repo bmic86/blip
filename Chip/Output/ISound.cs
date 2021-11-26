@@ -1,7 +1,7 @@
 ﻿namespace Chip.Output
 {
-	public interface ISound
-	{
-		public void EmitTone();
-	}
+    public interface ISound
+    {
+        public void EmitTone();
+    }
 }
