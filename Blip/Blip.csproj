@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
+    <PackageReference Include="Howler.Blazor" Version="0.9.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.0" PrivateAssets="all" />
   </ItemGroup>
@@ -21,6 +22,12 @@
 
   <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\sound\tone.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
