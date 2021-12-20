@@ -1,24 +1,60 @@
 ﻿@page "/"
+@implements IAsyncDisposable
+
 @using Blazor.Extensions
 @using Blazor.Extensions.Canvas.Canvas2D
 @using Chip;
 
+@inject IJSRuntime JS
 @inject Emulator ChipEmulator
 
 <PageTitle>Index</PageTitle>
 
 <BECanvas @ref="_canvasReference" Width="640" Height="320"></BECanvas>
 
+
 @code {
+  private DotNetObjectReference<Index> _mainComponent;
+  private IJSObjectReference _module;
+
   private Canvas2DContext _context;
 
   protected BECanvasComponent _canvasReference;
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    this._context = await this._canvasReference.CreateCanvas2DAsync();
-    await this._context.SetFillStyleAsync("black");
+    _mainComponent = DotNetObjectReference.Create(this);
 
-    await this._context.FillRectAsync(0, 0, 640, 320);
+    _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/input-bindings.js");
+    await _module.InvokeVoidAsync("registerInputHandlers", _mainComponent);
+
+    _context = await this._canvasReference.CreateCanvas2DAsync();
+    await _context.SetFillStyleAsync("black");
+
+    await _context.FillRectAsync(0, 0, 640, 320);
   }
+
+  [JSInvokable]
+  public void OnDocumentKeyUp(string key)
+  {
+
+  }
+
+  [JSInvokable]
+  public void OnDocumentKeyDown(string key)
+  {
+
+  }
+
+  async ValueTask IAsyncDisposable.DisposeAsync()
+  {
+    _mainComponent?.Dispose();
+
+    if (_module != null)
+    {
+      await _module.DisposeAsync();
+    }
+  }
+
+
 }
