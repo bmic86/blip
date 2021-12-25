@@ -24,7 +24,7 @@ namespace ChipTests.EmulatorTests
 
             // Then
             Assert.AreEqual(0, emulator.State.Stack.Count);
-            Assert.AreEqual(expectedResult, emulator.State.Registers.pc);
+            Assert.AreEqual(expectedResult, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -44,7 +44,7 @@ namespace ChipTests.EmulatorTests
             // Then
             Assert.AreEqual(1, emulator.State.Stack.Count);
             Assert.AreEqual(nextInstructionAddress, emulator.State.Stack.Peek());
-            Assert.AreEqual(addressToJump, emulator.State.Registers.pc);
+            Assert.AreEqual(addressToJump, emulator.State.Registers.PC);
         }
     }
 }

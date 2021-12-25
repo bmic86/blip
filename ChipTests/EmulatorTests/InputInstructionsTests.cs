@@ -39,7 +39,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -72,7 +72,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -105,7 +105,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -138,7 +138,90 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
+        }
+
+        [TestMethod]
+        public void GivenInstructionFX0A_WhenProcessingMultipleMachineCyclesAndKeyIsNotPressed_ThenDoNotProceedToNextInstruction()
+        {
+            // Given
+            var emulator = new Emulator(Substitute.For<ISound>());
+            emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
+
+            // When
+            emulator.ProcessNextMachineCycle();
+            emulator.ProcessNextMachineCycle();
+            emulator.ProcessNextMachineCycle();
+
+            // Then
+            Assert.AreEqual(Default.StartAddress, emulator.State.Registers.PC);
+        }
+
+        [TestMethod]
+        [DataRow(new byte[] { 0xF0, 0x0A }, 0x0, Key.F)]
+        [DataRow(new byte[] { 0xF1, 0x0A }, 0x1, Key.E)]
+        [DataRow(new byte[] { 0xF2, 0x0A }, 0x2, Key.D)]
+        [DataRow(new byte[] { 0xF3, 0x0A }, 0x3, Key.C)]
+        [DataRow(new byte[] { 0xF4, 0x0A }, 0x4, Key.B)]
+        [DataRow(new byte[] { 0xF5, 0x0A }, 0x5, Key.A)]
+        [DataRow(new byte[] { 0xF6, 0x0A }, 0x6, Key.Num9)]
+        [DataRow(new byte[] { 0xF7, 0x0A }, 0x7, Key.Num8)]
+        [DataRow(new byte[] { 0xF8, 0x0A }, 0x8, Key.Num7)]
+        [DataRow(new byte[] { 0xF9, 0x0A }, 0x9, Key.Num6)]
+        [DataRow(new byte[] { 0xFA, 0x0A }, 0xA, Key.Num5)]
+        [DataRow(new byte[] { 0xFB, 0x0A }, 0xB, Key.Num4)]
+        [DataRow(new byte[] { 0xFC, 0x0A }, 0xC, Key.Num3)]
+        [DataRow(new byte[] { 0xFD, 0x0A }, 0xD, Key.Num2)]
+        [DataRow(new byte[] { 0xFE, 0x0A }, 0xE, Key.Num1)]
+        [DataRow(new byte[] { 0xFF, 0x0A }, 0xF, Key.Num0)]
+        public void GivenInstructionFX0A_WhenExecuteInstructionAndKeyIsPressed_ThenSetVXRegisterToThePressedKeyValueAndDoNotProceedToNextInstruction(byte[] instruction, int x, Key key)
+        {
+            // Given
+            var emulator = new Emulator(Substitute.For<ISound>());
+            emulator.LoadProgram(instruction);
+
+            // When
+            emulator.ProcessNextMachineCycle();
+            emulator.Keypad.KeyDown(key);
+            emulator.ProcessNextMachineCycle();
+
+            // Then
+            Assert.AreEqual((byte)key, emulator.State.Registers.V[x]);
+            Assert.AreEqual(Default.StartAddress, emulator.State.Registers.PC);
+        }
+
+        [TestMethod]
+        public void GivenInstructionFX0A_WhenExecuteInstructionAndKeyIsPressed_ThenEmitSoundTone()
+        {
+            // Given
+            var soundDevice = Substitute.For<ISound>();
+            var emulator = new Emulator(soundDevice);
+            emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
+
+            // When
+            emulator.ProcessNextMachineCycle();
+            emulator.Keypad.KeyDown(Key.Num0);
+            emulator.ProcessNextMachineCycle();
+
+            // Then
+            soundDevice.Received().EmitTone();
+        }
+
+        [TestMethod]
+        public void GivenInstructionFX0A_WhenExecuteInstructionAndPressedKeyIsReleased_ThenProceedToNextInstruction()
+        {
+            // Given
+            var emulator = new Emulator(Substitute.For<ISound>());
+            emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
+
+            // When
+            emulator.ProcessNextMachineCycle();
+            emulator.Keypad.KeyDown(Key.Num0);
+            emulator.Keypad.KeyUp(Key.Num0);
+            emulator.ProcessNextMachineCycle();
+
+            // Then
+            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
         }
     }
 }

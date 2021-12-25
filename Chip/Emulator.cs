@@ -39,12 +39,12 @@ namespace Chip
 
             State.Stack.Clear();
             State.Registers.ClearAll();
-            State.Registers.pc = Default.StartAddress;
+            State.Registers.PC = Default.StartAddress;
             InitializeMemory(program);
         }
 
         public void ProcessNextMachineCycle() =>
-            State.Registers.pc = ExecuteNextInstruction();
+            State.Registers.PC = ExecuteNextInstruction();
 
         private void InitializeMemory(byte[] program)
         {
@@ -63,7 +63,7 @@ namespace Chip
 
         private ushort ExecuteNextInstruction()
         {
-            ushort currentPc = State.Registers.pc;
+            ushort currentPc = State.Registers.PC;
             var instruction = new Instruction(State.Memory[currentPc], State.Memory[currentPc + 1]);
 
             return instruction.Nibbles switch
@@ -114,7 +114,7 @@ namespace Chip
                     return GetNextInstructionAddress();
                 }
             }
-            return State.Registers.pc;
+            return State.Registers.PC;
         }
 
         private ushort SkipNextOnKeyNotPressed(int x)
@@ -297,7 +297,7 @@ namespace Chip
         }
 
         private ushort GetInstructionAddress(int offset)
-            => (ushort)(State.Registers.pc + offset);
+            => (ushort)(State.Registers.PC + offset);
 
         private ushort GetNextInstructionAddress()
             => GetInstructionAddress(InstructionSize);

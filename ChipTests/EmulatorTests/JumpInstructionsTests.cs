@@ -22,7 +22,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(expectedResult, emulator.State.Registers.pc);
+            Assert.AreEqual(expectedResult, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -84,7 +84,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -146,7 +146,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -178,7 +178,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -210,7 +210,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -242,7 +242,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -274,7 +274,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.pc);
+            Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
         }
 
         [TestMethod]
@@ -294,7 +294,7 @@ namespace ChipTests.EmulatorTests
             emulator.ProcessNextMachineCycle();
 
             // Then
-            Assert.AreEqual(expectedResult, emulator.State.Registers.pc);
+            Assert.AreEqual(expectedResult, emulator.State.Registers.PC);
         }
     }
 }
