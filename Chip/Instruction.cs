@@ -20,5 +20,7 @@
             Nibbles = (n1: _instructionCode & 0xF000, n2: _instructionCode & 0x0F00, n3: _instructionCode & 0x00F0, n4: _instructionCode & 0x000F);
             Value = lowOrderInstructionByte;
         }
+
+        public override string ToString() => $"{_instructionCode:X4}";
     }
 }

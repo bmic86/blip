@@ -2,6 +2,7 @@
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System.Threading.Tasks;
 
 namespace ChipTests.EmulatorTests
 {
@@ -25,15 +26,15 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x7D, 0xD1 }, 0xD, (byte)0x1D, (byte)0xEE)]
         [DataRow(new byte[] { 0x7E, 0xE2 }, 0xE, (byte)0x0F, (byte)0xF1)]
         [DataRow(new byte[] { 0x7F, 0xF0 }, 0xF, (byte)0x0F, (byte)0xFF)]
-        public void GivenInstruction7XNN_WhenExecuteInstruction_ThenAddNNToRegisterVX(byte[] instruction, int x, byte initialRegisterValue, byte expectedValue)
+        public async Task GivenInstruction7XNN_WhenExecuteInstruction_ThenAddNNToRegisterVX(byte[] instruction, int x, byte initialRegisterValue, byte expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(expectedValue, emulator.State.Registers.V[x]);
@@ -55,16 +56,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x8C, 0x34 }, 0xC, 0x3, (byte)25, (byte)3)]
         [DataRow(new byte[] { 0x8D, 0x24 }, 0xD, 0x2, (byte)5, (byte)7)]
         [DataRow(new byte[] { 0x8E, 0x14 }, 0xE, 0x1, (byte)200, (byte)55)]
-        public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesLessOrEqual255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+        public async Task GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesLessOrEqual255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(initialRegisterYValue + initialRegisterXValue, emulator.State.Registers.V[x]);
@@ -87,16 +88,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x8C, 0x34 }, 0xC, 0x3, (byte)25, (byte)255)]
         [DataRow(new byte[] { 0x8D, 0x24 }, 0xD, 0x2, (byte)255, (byte)7)]
         [DataRow(new byte[] { 0x8E, 0x14 }, 0xE, 0x1, (byte)255, (byte)8)]
-        public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesGreaterThan255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+        public async Task GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesGreaterThan255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual((byte)(initialRegisterYValue + initialRegisterXValue), emulator.State.Registers.V[x]);
@@ -119,16 +120,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x8C, 0x35 }, 0xC, 0x3, (byte)73, (byte)57)]
         [DataRow(new byte[] { 0x8D, 0x25 }, 0xD, 0x2, (byte)66, (byte)28)]
         [DataRow(new byte[] { 0x8E, 0x15 }, 0xE, 0x1, (byte)85, (byte)33)]
-        public void GivenInstruction8XY5AndRegisterValueVXGreaterOrEqualVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+        public async Task GivenInstruction8XY5AndRegisterValueVXGreaterOrEqualVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual((byte)(initialRegisterXValue - initialRegisterYValue), emulator.State.Registers.V[x]);
@@ -151,16 +152,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x8C, 0x35 }, 0xC, 0x3, (byte)7, (byte)57)]
         [DataRow(new byte[] { 0x8D, 0x25 }, 0xD, 0x2, (byte)66, (byte)90)]
         [DataRow(new byte[] { 0x8E, 0x15 }, 0xE, 0x1, (byte)85, (byte)123)]
-        public void GivenInstruction8XY5AndRegisterValuesVYGreaterThanVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+        public async Task GivenInstruction8XY5AndRegisterValuesVYGreaterThanVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual((byte)(initialRegisterXValue - initialRegisterYValue), emulator.State.Registers.V[x]);
@@ -183,16 +184,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x8C, 0x37 }, 0xC, 0x3, (byte)5, (byte)55)]
         [DataRow(new byte[] { 0x8D, 0x27 }, 0xD, 0x2, (byte)2, (byte)68)]
         [DataRow(new byte[] { 0x8E, 0x17 }, 0xE, 0x1, (byte)42, (byte)54)]
-        public void GivenInstruction8XY7AndRegisterValueVYGreaterOrEqualVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+        public async Task GivenInstruction8XY7AndRegisterValueVYGreaterOrEqualVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual((byte)(initialRegisterYValue - initialRegisterXValue), emulator.State.Registers.V[x]);
@@ -215,16 +216,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x8C, 0x37 }, 0xC, 0x3, (byte)57, (byte)7)]
         [DataRow(new byte[] { 0x8D, 0x27 }, 0xD, 0x2, (byte)90, (byte)66)]
         [DataRow(new byte[] { 0x8E, 0x17 }, 0xE, 0x1, (byte)123, (byte)85)]
-        public void GivenInstruction8XY7AndRegisterValuesVXGreaterThanVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
+        public async Task GivenInstruction8XY7AndRegisterValuesVXGreaterThanVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual((byte)(initialRegisterYValue - initialRegisterXValue), emulator.State.Registers.V[x]);
@@ -248,16 +249,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0xFD, 0x1E }, (byte)0xD, (ushort)76, (byte)34)]
         [DataRow(new byte[] { 0xFE, 0x1E }, (byte)0xE, (ushort)1285, (byte)127)]
         [DataRow(new byte[] { 0xFF, 0x1E }, (byte)0xF, (ushort)45, (byte)59)]
-        public void GivenInstructionFX1E_WhenExecuteInstruction_ThenSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
+        public async Task GivenInstructionFX1E_WhenExecuteInstruction_ThenSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.I = initialIndexValue;
             emulator.State.Registers.V[x] = initialVxValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(initialIndexValue + initialVxValue, emulator.State.Registers.I);

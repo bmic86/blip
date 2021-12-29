@@ -2,6 +2,7 @@
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System.Threading.Tasks;
 
 namespace ChipTests.EmulatorTests
 {
@@ -9,18 +10,18 @@ namespace ChipTests.EmulatorTests
     public class SubroutineInstructionsTests
     {
         [TestMethod]
-        public void GivenInstruction00EEAndNotEmptyStack_WhenExecuteInstruction_ThenPopAddressFromStackAndLoadItToProgramCounter()
+        public async Task GivenInstruction00EEAndNotEmptyStack_WhenExecuteInstruction_ThenPopAddressFromStackAndLoadItToProgramCounter()
         {
             // Given
             byte[] instruction = { 0x00, 0xEE };
             ushort expectedResult = 0xABC;
 
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Stack.Push(expectedResult);
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(0, emulator.State.Stack.Count);
@@ -28,18 +29,18 @@ namespace ChipTests.EmulatorTests
         }
 
         [TestMethod]
-        public void GivenInstruction2NNN_WhenExecuteInstruction_ThenPushNextInstructionAddressToTheStackAndJumpToAddressNNN()
+        public async Task GivenInstruction2NNN_WhenExecuteInstruction_ThenPushNextInstructionAddressToTheStackAndJumpToAddressNNN()
         {
             // Given
             byte[] instruction = { 0x2F, 0xFF };
             ushort addressToJump = 0xFFF;
             ushort nextInstructionAddress = Default.StartAddress + 2;
 
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(1, emulator.State.Stack.Count);

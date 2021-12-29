@@ -3,6 +3,7 @@ using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ChipTests.EmulatorTests
 {
@@ -26,10 +27,13 @@ namespace ChipTests.EmulatorTests
         [DataRow(0xD)]
         [DataRow(0xE)]
         [DataRow(0xF)]
-        public void GivenDigitDrawingProgramAndValueInRegisterV0_WhenExecuteProgram_ThenProgramShouldDrawSpriteOfAHexDigitFromV0Value(int digit)
+        public async Task GivenDigitDrawingProgramAndValueInRegisterV0_WhenExecuteProgram_ThenProgramShouldDrawSpriteOfAHexDigitFromV0Value(int digit)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
 
             emulator.LoadProgram(new byte[] 
             { 
@@ -39,8 +43,8 @@ namespace ChipTests.EmulatorTests
             emulator.State.Registers.V[0] = (byte)digit;
 
             // When
-            emulator.ProcessNextMachineCycle();
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             var frame = emulator.Display.ReadFrame();

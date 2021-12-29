@@ -2,6 +2,7 @@
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System.Threading.Tasks;
 
 namespace ChipTests.EmulatorTests
 {
@@ -12,14 +13,14 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x10, 0x00 }, (ushort)0x000)]
         [DataRow(new byte[] { 0x12, 0x34 }, (ushort)0x234)]
         [DataRow(new byte[] { 0x1F, 0xFF }, (ushort)0xFFF)]
-        public void GivenInstruction1NNN_WhenExecuteInstruction_ThenProgramShouldJumpToAddressNNN(byte[] instruction, ushort expectedResult)
+        public async Task GivenInstruction1NNN_WhenExecuteInstruction_ThenProgramShouldJumpToAddressNNN(byte[] instruction, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(expectedResult, emulator.State.Registers.PC);
@@ -42,15 +43,15 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x3D, 0xDD }, 0xD, (byte)0xDD)]
         [DataRow(new byte[] { 0x3E, 0xEE }, 0xE, (byte)0xEE)]
         [DataRow(new byte[] { 0x3F, 0xFF }, 0xF, (byte)0xFF)]
-        public void GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
+        public async Task GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
@@ -73,15 +74,15 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x3D, 0xDD }, 0xD, (byte)0xDF)]
         [DataRow(new byte[] { 0x3E, 0xEE }, 0xE, (byte)0xF0)]
         [DataRow(new byte[] { 0x3F, 0xFF }, 0xF, (byte)0xF1)]
-        public void GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
+        public async Task GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
@@ -104,15 +105,15 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x4D, 0xDD }, 0xD, (byte)0xDF)]
         [DataRow(new byte[] { 0x4E, 0xEE }, 0xE, (byte)0xF0)]
         [DataRow(new byte[] { 0x4F, 0xFF }, 0xF, (byte)0xF1)]
-        public void GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
+        public async Task GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
@@ -135,15 +136,15 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x4D, 0xDD }, 0xD, (byte)0xDD)]
         [DataRow(new byte[] { 0x4E, 0xEE }, 0xE, (byte)0xEE)]
         [DataRow(new byte[] { 0x4F, 0xFF }, 0xF, (byte)0xFF)]
-        public void GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
+        public async Task GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
@@ -166,16 +167,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x5D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0xDD)]
         [DataRow(new byte[] { 0x5E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0xEE)]
         [DataRow(new byte[] { 0x5F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0xFF)]
-        public void GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+        public async Task GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
@@ -198,16 +199,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x5D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0x22)]
         [DataRow(new byte[] { 0x5E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0x11)]
         [DataRow(new byte[] { 0x5F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0x00)]
-        public void GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+        public async Task GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
@@ -230,16 +231,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x9D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0x22)]
         [DataRow(new byte[] { 0x9E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0x11)]
         [DataRow(new byte[] { 0x9F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0x00)]
-        public void GivenInstruction9XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+        public async Task GivenInstruction9XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 4, emulator.State.Registers.PC);
@@ -262,16 +263,16 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0x9D, 0x20 }, 0xD, 0x2, (byte)0xDD, (byte)0xDD)]
         [DataRow(new byte[] { 0x9E, 0x10 }, 0xE, 0x1, (byte)0xEE, (byte)0xEE)]
         [DataRow(new byte[] { 0x9F, 0x00 }, 0xF, 0x0, (byte)0xFF, (byte)0xFF)]
-        public void GivenInstruction9XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
+        public async Task GivenInstruction9XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(Default.StartAddress + 2, emulator.State.Registers.PC);
@@ -283,15 +284,15 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0xB0, 0x00 }, (byte)0xEF, (ushort)0x00EF)]
         [DataRow(new byte[] { 0xB1, 0x23 }, (byte)0x45, (ushort)0x0168)]
         [DataRow(new byte[] { 0xBF, 0xFF }, (byte)0xFF, (ushort)0x10FE)]
-        public void GivenInstructionBNNN_WhenExecuteInstruction_ThenShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
+        public async Task GivenInstructionBNNN_WhenExecuteInstruction_ThenShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[0] = initialRegisterValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             Assert.AreEqual(expectedResult, emulator.State.Registers.PC);

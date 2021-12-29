@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ChipTests.EmulatorTests
 {
@@ -14,13 +15,13 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0xF0, 0x65 }, (byte)0x0, (ushort)0x202)]
         [DataRow(new byte[] { 0xF9, 0x65 }, (byte)0x9, (ushort)0xABC)]
         [DataRow(new byte[] { 0xFF, 0x65 }, (byte)0xF, (ushort)0xFF0)]
-        public void GivenInstructionFX65_WhenExecuteInstruction_ThenLoadValuesOfRegistersV0ToVXFromMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
+        public async Task GivenInstructionFX65_WhenExecuteInstruction_ThenLoadValuesOfRegistersV0ToVXFromMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
         {
             // Given
             int valuesCount = x + 1;
             byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
 
             emulator.State.Registers.I = initialIndexValue;
@@ -30,7 +31,7 @@ namespace ChipTests.EmulatorTests
             }
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             CollectionAssert.AreEqual(expectedRegisterValues, new ArraySegment<byte>(emulator.State.Registers.V, 0, valuesCount).ToArray());
@@ -41,13 +42,13 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0xF0, 0x55 }, (byte)0x0, (ushort)0x202)]
         [DataRow(new byte[] { 0xF9, 0x55 }, (byte)0x9, (ushort)0xABC)]
         [DataRow(new byte[] { 0xFF, 0x55 }, (byte)0xF, (ushort)0xFF0)]
-        public void GivenInstructionFX55_WhenExecuteInstruction_ThenStoreValuesOfRegistersV0ToVXInMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
+        public async Task GivenInstructionFX55_WhenExecuteInstruction_ThenStoreValuesOfRegistersV0ToVXInMemoryAndUpdateIndexRegister(byte[] instruction, byte x, ushort initialIndexValue)
         {
             // Given
             int valuesCount = x + 1;
             byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
 
             emulator.State.Registers.I = initialIndexValue;
@@ -57,7 +58,7 @@ namespace ChipTests.EmulatorTests
             }
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             CollectionAssert.AreEqual(expectedRegisterValues, new ArraySegment<byte>(emulator.State.Memory, initialIndexValue, valuesCount).ToArray());
@@ -81,18 +82,18 @@ namespace ChipTests.EmulatorTests
         [DataRow(new byte[] { 0xFD, 0x33 }, (byte)0xD, (byte)74, new byte[] { 0, 7, 4 })]
         [DataRow(new byte[] { 0xFE, 0x33 }, (byte)0xE, (byte)15, new byte[] { 0, 1, 5 })]
         [DataRow(new byte[] { 0xFF, 0x33 }, (byte)0xF, (byte)0, new byte[] { 0, 0, 0 })]
-        public void GivenInstructionFX33_WhenExecuteInstruction_ThenStoreValueOfVXInMemoryAsBinaryCodedDecimalAndNotUpdateIndexRegister(byte[] instruction, byte x, byte initialVxValue, byte[] expectedResult)
+        public async Task GivenInstructionFX33_WhenExecuteInstruction_ThenStoreValueOfVXInMemoryAsBinaryCodedDecimalAndNotUpdateIndexRegister(byte[] instruction, byte x, byte initialVxValue, byte[] expectedResult)
         {
             // Given
             const ushort initialIndexValue = 0x300;
 
-            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
+            var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialVxValue;
             emulator.State.Registers.I = initialIndexValue;
 
             // When
-            emulator.ProcessNextMachineCycle();
+            await emulator.ProcessNextMachineCycleAsync();
 
             // Then
             CollectionAssert.AreEqual(expectedResult, new ArraySegment<byte>(emulator.State.Memory, initialIndexValue, 3).ToArray());
