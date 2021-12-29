@@ -30,7 +30,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionEX9EAndLeastSignificantDigitOfVXEqualToPressedKey_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.Keypad.KeyDown(key);
@@ -63,7 +63,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionEX9EAndLeastSignificantDigitOfVXNotEqualToPressedKey_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.Keypad.KeyDown(key);
@@ -96,7 +96,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionEXA1AndLeastSignificantDigitOfVXNotEqualToPressedKey_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.Keypad.KeyDown(key);
@@ -129,7 +129,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionEXA1AndLeastSignificantDigitOfVXEqualToPressedKey_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.Keypad.KeyDown(key);
@@ -145,7 +145,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionFX0A_WhenProcessingMultipleMachineCyclesAndKeyIsNotPressed_ThenDoNotProceedToNextInstruction()
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
 
             // When
@@ -177,7 +177,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionFX0A_WhenExecuteInstructionAndKeyIsPressed_ThenSetVXRegisterToThePressedKeyValueAndDoNotProceedToNextInstruction(byte[] instruction, int x, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
 
             // When
@@ -195,7 +195,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var soundDevice = Substitute.For<ISound>();
-            var emulator = new Emulator(soundDevice);
+            var emulator = new Emulator(soundDevice, Substitute.For<IRenderer>());
             emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
 
             // When
@@ -211,7 +211,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionFX0A_WhenExecuteInstructionAndPressedKeyIsReleased_ThenProceedToNextInstruction()
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
 
             // When

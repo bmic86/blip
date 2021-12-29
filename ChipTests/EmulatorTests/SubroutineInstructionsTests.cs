@@ -15,7 +15,7 @@ namespace ChipTests.EmulatorTests
             byte[] instruction = { 0x00, 0xEE };
             ushort expectedResult = 0xABC;
 
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Stack.Push(expectedResult);
 
@@ -35,7 +35,7 @@ namespace ChipTests.EmulatorTests
             ushort addressToJump = 0xFFF;
             ushort nextInstructionAddress = Default.StartAddress + 2;
 
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
 
             // When

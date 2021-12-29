@@ -29,7 +29,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY1_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -61,7 +61,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY2_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXAndVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -93,7 +93,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY3_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXExclusiveOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -124,7 +124,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY6_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedRightInVXAndStoreLeastSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -155,7 +155,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XYE_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedLeftInVXAndStoreMostSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[y] = initialRegisterYValue;
 

@@ -15,7 +15,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction1NNN_WhenExecuteInstruction_ThenProgramShouldJumpToAddressNNN(byte[] instruction, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
 
             // When
@@ -45,7 +45,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
@@ -76,7 +76,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
@@ -107,7 +107,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
@@ -138,7 +138,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = value;
 
@@ -169,7 +169,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
@@ -201,7 +201,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
@@ -233,7 +233,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction9XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
@@ -265,7 +265,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction9XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
@@ -286,7 +286,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionBNNN_WhenExecuteInstruction_ThenShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[0] = initialRegisterValue;
 

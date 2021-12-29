@@ -11,14 +11,18 @@ namespace Chip
         private const int InstructionSize = 2;
 
         private readonly IRandomGenerator _randomGenerator;
+        private readonly IRenderer _renderer;
+
+        internal Display Display { get; private set; } = new();
 
         internal MachineState State { get; private set; } = new();
 
         public Keypad Keypad { get; private set; }
 
-        public Emulator(ISound sound)
+        public Emulator(ISound sound, IRenderer renderer)
         {
             Keypad = new Keypad(sound);
+            _renderer = renderer;
             _randomGenerator = new RandomGenerator();
         }
 
@@ -68,6 +72,7 @@ namespace Chip
 
             return instruction.Nibbles switch
             {
+                (0x0000, 0x0000, 0x00E0, 0x0000) => ClearScreen(),
                 (0x0000, 0x0000, 0x00E0, 0x000E) => ReturnFromSubroutine(),
                 (0x1000, _, _, _) => instruction.Address,
                 (0x2000, _, _, _) => CallSubroutine(instruction.Address),
@@ -89,6 +94,7 @@ namespace Chip
                 (0xA000, _, _, _) => LoadAddressToIndexRegister(instruction.Address),
                 (0xB000, _, _, _) => (ushort)(instruction.Address + State.Registers.V[0]),
                 (0xC000, _, _, _) => SetRandomValueWithMaskOnVx(instruction.VXIndex, instruction.Value),
+                (0xD000, _, _, _) => DrawSprite(instruction.VXIndex, instruction.VYIndex, instruction.Nibbles.n4),
                 (0xE000, _, 0x0090, 0x000E) => SkipNextOnKeyPressed(instruction.VXIndex),
                 (0xE000, _, 0x00A0, 0x0001) => SkipNextOnKeyNotPressed(instruction.VXIndex),
                 (0xF000, _, 0x0000, 0x000A) => WaitForKeyPress(instruction.VXIndex),
@@ -99,6 +105,32 @@ namespace Chip
                 (0xF000, _, 0x0060, 0x0005) => LoadRegistersInBulk(instruction.VXIndex),
                 _ => throw new ChipProgramExecutionException($"Unrecognized instruction.")
             };
+        }
+
+        private ushort DrawSprite(int x, int y, int n)
+        {
+            int drawPositionX = State.Registers.V[x] % Display.Width;
+            int drawPositionY = State.Registers.V[y] % Display.Height;
+            int startIndex = State.Registers.I;
+
+            bool wasCollision = false;
+            for (int i = 0; i < n && drawPositionY < Display.Height; ++i)
+            {
+                wasCollision |= Display.DrawPixelsOctet(drawPositionX, drawPositionY, State.Memory[startIndex + i]);
+                ++drawPositionY;
+            }
+
+            State.Registers.V[0xF] = Convert.ToByte(wasCollision);
+
+            _renderer.DrawFrame(Display.ReadFrame(), Display.Width, Display.Height);
+            return GetNextInstructionAddress();
+        }
+
+        private ushort ClearScreen()
+        {
+            Display.Clear();
+            _renderer.ClearScreen();
+            return GetNextInstructionAddress();
         }
 
         private ushort WaitForKeyPress(int x)

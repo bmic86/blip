@@ -28,7 +28,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction6XNN_WhenExecuteInstruction_ThenLoadNNToRegisterVX(byte[] instruction, int x, byte expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
 
             // When
@@ -58,7 +58,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY0_WhenExecuteInstruction_ThenLoadValueOfRegisterVYIntoRegisterVX(byte[] instruction, int x, int y, byte initialRegisterValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[y] = initialRegisterValue;
 
@@ -76,7 +76,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionANNN_WhenExecuteInstruction_ThenStoreAddressNNNInIndexRegister(byte[] instruction, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
 
             // When
@@ -107,7 +107,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionFX29_WhenExecuteInstruction_ThenSetIndexRegisterToCharacterSpriteAddressOfLowestSignificantDigitInVXValue(byte[] instruction, byte x, byte initialVxValue, ushort expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialVxValue;
 

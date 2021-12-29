@@ -28,7 +28,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction7XNN_WhenExecuteInstruction_ThenAddNNToRegisterVX(byte[] instruction, int x, byte initialRegisterValue, byte expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterValue;
 
@@ -58,7 +58,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesLessOrEqual255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -90,7 +90,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesGreaterThan255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -122,7 +122,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY5AndRegisterValueVXGreaterOrEqualVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -154,7 +154,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY5AndRegisterValuesVYGreaterThanVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -186,7 +186,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY7AndRegisterValueVYGreaterOrEqualVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -218,7 +218,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstruction8XY7AndRegisterValuesVXGreaterThanVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
@@ -251,7 +251,7 @@ namespace ChipTests.EmulatorTests
         public void GivenInstructionFX1E_WhenExecuteInstruction_ThenSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>(), Substitute.For<IRenderer>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.I = initialIndexValue;
             emulator.State.Registers.V[x] = initialVxValue;

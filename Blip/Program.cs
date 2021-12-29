@@ -13,6 +13,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSingleton<IHowl, Howl>();
 builder.Services.AddSingleton<ISound, SoundService>();
+builder.Services.AddSingleton<IRenderer, RenderService>();
 builder.Services.AddSingleton<Emulator>();
 
 await builder.Build().RunAsync();
