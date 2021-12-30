@@ -5,14 +5,16 @@
 @using Blazor.Extensions.Canvas.Canvas2D
 @using Blip.Services
 @using Chip;
+@using Chip.Input
 @using Chip.Output
 
 @inject IJSRuntime JS
 @inject Emulator ChipEmulator
+@inject KeyMappingsService KeyMappingsService;
 
 <PageTitle>Index</PageTitle>
 
-<InputFile OnChange="@LoadFile"/>
+<InputFile OnChange="@LoadFile" />
 
 <BECanvas @ref="_canvasReference" Width="640" Height="320"></BECanvas>
 
@@ -44,13 +46,21 @@
   [JSInvokable]
   public void OnDocumentKeyUp(string key)
   {
-
+    Key? mappedKey = KeyMappingsService.GetKeyMapping(key);
+    if (mappedKey != null)
+    {
+      ChipEmulator.Keypad.KeyUp(mappedKey.Value);
+    }
   }
 
   [JSInvokable]
   public void OnDocumentKeyDown(string key)
   {
-
+    Key? mappedKey = KeyMappingsService.GetKeyMapping(key);
+    if (mappedKey != null)
+    {
+      ChipEmulator.Keypad.KeyDown(mappedKey.Value);
+    }
   }
 
   private async void LoadFile(InputFileChangeEventArgs args)
@@ -64,7 +74,7 @@
     _timer = new Timer(async _ =>
     {
       await ChipEmulator.ProcessNextMachineCycleAsync();
-    }, null, 0, 1000/500);
+    }, null, 0, 1000 / 500);
   }
 
   async ValueTask IAsyncDisposable.DisposeAsync()

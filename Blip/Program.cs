@@ -14,5 +14,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddSingleton<IHowl, Howl>();
 builder.Services.AddSingleton<ISound, SoundService>();
 builder.Services.AddSingleton<Emulator>();
+builder.Services.AddSingleton<KeyMappingsService>();
 
 await builder.Build().RunAsync();
