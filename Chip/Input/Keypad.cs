@@ -1,4 +1,5 @@
 ﻿using Chip.Output;
+using System.Threading.Tasks;
 
 namespace Chip.Input
 {
@@ -10,13 +11,13 @@ namespace Chip.Input
 
         public void KeyUp(Key key) => _isKeyPressed[(int)key] = false;
 
-        public void KeyDown(Key key)
+        public async Task KeyDownAsync(Key key)
         {
             _isKeyPressed[(int)key] = true;
             if (_isInCaptureSingleKeyMode && CapturedKey == null)
             {
                 CapturedKey = key;
-                _sound.EmitTone();
+                await _sound.EmitToneAsync();
             }
         }
 

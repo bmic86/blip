@@ -34,7 +34,7 @@ namespace ChipTests.EmulatorTests
             var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
-            emulator.Keypad.KeyDown(key);
+            await emulator.Keypad.KeyDownAsync(key);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -67,7 +67,7 @@ namespace ChipTests.EmulatorTests
             var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
-            emulator.Keypad.KeyDown(key);
+            await emulator.Keypad.KeyDownAsync(key);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -85,11 +85,11 @@ namespace ChipTests.EmulatorTests
             emulator.LoadProgram(new byte[] { 0xE0, 0x9E });
 
             // When
-            emulator.Keypad.KeyDown(Key.Num0);
+            await emulator.Keypad.KeyDownAsync(Key.Num0);
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            soundDevice.DidNotReceive().EmitTone();
+            await soundDevice.DidNotReceive().EmitToneAsync();
         }
 
         [TestMethod]
@@ -116,7 +116,7 @@ namespace ChipTests.EmulatorTests
             var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
-            emulator.Keypad.KeyDown(key);
+            await emulator.Keypad.KeyDownAsync(key);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -149,7 +149,7 @@ namespace ChipTests.EmulatorTests
             var emulator = new Emulator(Substitute.For<ISound>());
             emulator.LoadProgram(instruction);
             emulator.State.Registers.V[x] = vxValue;
-            emulator.Keypad.KeyDown(key);
+            await emulator.Keypad.KeyDownAsync(key);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -167,11 +167,11 @@ namespace ChipTests.EmulatorTests
             emulator.LoadProgram(new byte[] { 0xE0, 0xA1 });
 
             // When
-            emulator.Keypad.KeyDown(Key.Num0);
+            await emulator.Keypad.KeyDownAsync(Key.Num0);
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            soundDevice.DidNotReceive().EmitTone();
+            await soundDevice.DidNotReceive().EmitToneAsync();
         }
 
         [TestMethod]
@@ -215,7 +215,7 @@ namespace ChipTests.EmulatorTests
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
-            emulator.Keypad.KeyDown(key);
+            await emulator.Keypad.KeyDownAsync(key);
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
@@ -233,11 +233,11 @@ namespace ChipTests.EmulatorTests
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
-            emulator.Keypad.KeyDown(Key.Num0);
+            await emulator.Keypad.KeyDownAsync(Key.Num0);
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            soundDevice.Received().EmitTone();
+            await soundDevice.Received().EmitToneAsync();
         }
 
         [TestMethod]
@@ -249,7 +249,7 @@ namespace ChipTests.EmulatorTests
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
-            emulator.Keypad.KeyDown(Key.Num0);
+            await emulator.Keypad.KeyDownAsync(Key.Num0);
             emulator.Keypad.KeyUp(Key.Num0);
             await emulator.ProcessNextMachineCycleAsync();
 

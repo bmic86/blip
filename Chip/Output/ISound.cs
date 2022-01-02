@@ -1,7 +1,9 @@
-﻿namespace Chip.Output
+﻿using System.Threading.Tasks;
+
+namespace Chip.Output
 {
     public interface ISound
     {
-        public void EmitTone();
+        public Task EmitToneAsync();
     }
 }

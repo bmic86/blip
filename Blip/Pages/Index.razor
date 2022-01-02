@@ -54,12 +54,12 @@
   }
 
   [JSInvokable]
-  public void OnDocumentKeyDown(string key)
+  public async void OnDocumentKeyDown(string key)
   {
     Key? mappedKey = KeyMappingsService.GetKeyMapping(key);
     if (mappedKey != null)
     {
-      ChipEmulator.Keypad.KeyDown(mappedKey.Value);
+      await ChipEmulator.Keypad.KeyDownAsync(mappedKey.Value);
     }
   }
 

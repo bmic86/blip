@@ -12,6 +12,6 @@ namespace Blip.Services
             _howler = howler ?? throw new ArgumentNullException(nameof(howler));
         }
 
-        public void EmitTone() => _howler.Play("/sound/tone.wav");
+        public async Task EmitToneAsync() => await _howler.Play("/sound/tone.wav");
     }
 }
