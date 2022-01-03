@@ -2,6 +2,7 @@
 using Chip.Input;
 using Chip.Output;
 using Chip.Random;
+using Chip.Timers;
 using System;
 using System.Threading.Tasks;
 
@@ -16,6 +17,8 @@ namespace Chip
         internal Display Display { get; private set; } = new();
 
         internal MachineState State { get; private set; } = new();
+
+        internal DelayTimer DelayTimer { get; private set; } = new();
 
         public Keypad Keypad { get; private set; }
 
@@ -53,8 +56,11 @@ namespace Chip
             Display.Clear();
         }
 
-        public async Task ProcessNextMachineCycleAsync() =>
+        public async Task ProcessNextMachineCycleAsync()
+        {
+            DelayTimer.Update();
             State.Registers.PC = await ExecuteNextInstructionAsync();
+        }
 
         private void InitializeMemory(byte[] program)
         {
@@ -103,7 +109,10 @@ namespace Chip
                 (0xD000, _, _, _) => await DrawSpriteAsync(instruction.VXIndex, instruction.VYIndex, instruction.Nibbles.n4),
                 (0xE000, _, 0x0090, 0x000E) => SkipNextOnKeyPressed(instruction.VXIndex),
                 (0xE000, _, 0x00A0, 0x0001) => SkipNextOnKeyNotPressed(instruction.VXIndex),
+                (0xF000, _, 0x0000, 0x0007) => LoadVxFromDelayTimer(instruction.VXIndex),
                 (0xF000, _, 0x0000, 0x000A) => WaitForKeyPress(instruction.VXIndex),
+                (0xF000, _, 0x0010, 0x0005) => LoadDelayTimerFromVx(instruction.VXIndex),
+                //(0xF000, _, 0x0010, 0x0008) => ,
                 (0xF000, _, 0x0010, 0x000E) => AddVxToIndexRegister(instruction.VXIndex),
                 (0xF000, _, 0x0020, 0x0009) => SetIndexRegisterToCharacterSpriteAddress(instruction.VXIndex),
                 (0xF000, _, 0x0030, 0x0003) => StoreVxAsBinaryCodedDecimal(instruction.VXIndex),
@@ -111,6 +120,18 @@ namespace Chip
                 (0xF000, _, 0x0060, 0x0005) => LoadRegistersInBulk(instruction.VXIndex),
                 _ => throw new ChipProgramExecutionException($"Unrecognized instruction `{instruction}`.")
             };
+        }
+
+        private ushort LoadVxFromDelayTimer(int x)
+        {
+            State.Registers.V[x] = DelayTimer.Value;
+            return GetNextInstructionAddress();
+        }
+
+        private ushort LoadDelayTimerFromVx(int x)
+        {
+            DelayTimer.Start(State.Registers.V[x]);
+            return GetNextInstructionAddress();
         }
 
         private async Task<ushort> DrawSpriteAsync(int x, int y, int n)
