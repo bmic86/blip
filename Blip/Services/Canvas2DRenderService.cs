@@ -1,4 +1,5 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
+using Chip.Display;
 using Chip.Output;
 
 namespace Blip.Services
@@ -7,7 +8,7 @@ namespace Blip.Services
     {
         Canvas2DContext _context;
 
-        public Canvas2DRenderService(Canvas2DContext context) 
+        public Canvas2DRenderService(Canvas2DContext context)
             => _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public async Task ClearScreenAsync()
@@ -16,24 +17,12 @@ namespace Blip.Services
             await _context.FillRectAsync(0, 0, 640, 320);
         }
 
-        public async Task DrawFrameAsync(IEnumerable<IEnumerable<bool>> frame, int width, int height)
+        public async Task DrawPixelsAsync(IEnumerable<Pixel> pixels)
         {
-            await ClearScreenAsync();
-            await _context.SetFillStyleAsync("white");
-
-            int y = 0;
-            foreach (var row in frame)
+            foreach (var pixel in pixels)
             {
-                int x = 0;
-                foreach (var val in row)
-                {
-                    if (val)
-                    {
-                        await _context.FillRectAsync(x * 10, y * 10, 10, 10);
-                    }
-                    x++;
-                }
-                y++;
+                await _context.SetFillStyleAsync(pixel.Value ? "white" : "black");
+                await _context.FillRectAsync(pixel.X * 10, pixel.Y * 10, 10, 10);
             }
         }
     }

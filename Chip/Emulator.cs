@@ -1,4 +1,5 @@
-﻿using Chip.Exceptions;
+﻿using Chip.Display;
+using Chip.Exceptions;
 using Chip.Input;
 using Chip.Output;
 using Chip.Random;
@@ -14,7 +15,7 @@ namespace Chip
 
         private readonly IRandomGenerator _randomGenerator;
 
-        internal Display Display { get; private set; } = new();
+        internal Screen Screen { get; private set; } = new();
 
         internal MachineState State { get; private set; } = new();
 
@@ -53,7 +54,7 @@ namespace Chip
             State.Registers.ClearAll();
             State.Registers.PC = Default.StartAddress;
             InitializeMemory(program);
-            Display.Clear();
+            Screen.Clear();
         }
 
         public async Task ProcessNextMachineCycleAsync()
@@ -136,26 +137,27 @@ namespace Chip
 
         private async Task<ushort> DrawSpriteAsync(int x, int y, int n)
         {
-            int drawPositionX = State.Registers.V[x] % Display.Width;
-            int drawPositionY = State.Registers.V[y] % Display.Height;
+            int drawPositionX = State.Registers.V[x] % Screen.Width;
+            int initialDrawPositionY = State.Registers.V[y] % Screen.Height;
+            int drawPositionY = initialDrawPositionY;
             int startIndex = State.Registers.I;
 
             bool wasCollision = false;
-            for (int i = 0; i < n && drawPositionY < Display.Height; ++i)
+            for (int i = 0; i < n && drawPositionY < Screen.Height; ++i)
             {
-                wasCollision |= Display.DrawPixelsOctet(drawPositionX, drawPositionY, State.Memory[startIndex + i]);
+                wasCollision |= Screen.DrawPixelsOctetFromByte(drawPositionX, drawPositionY, State.Memory[startIndex + i]);
                 ++drawPositionY;
             }
-
+ 
             State.Registers.V[0xF] = Convert.ToByte(wasCollision);
 
-            await Renderer.DrawFrameAsync(Display.ReadFrame(), Display.Width, Display.Height);
+            await Renderer.DrawPixelsAsync(Screen.ReadPixels(drawPositionX, initialDrawPositionY, 8, n));
             return GetNextInstructionAddress();
         }
 
         private async Task<ushort> ClearScreenAsync()
         {
-            Display.Clear();
+            Screen.Clear();
             await Renderer.ClearScreenAsync();
             return GetNextInstructionAddress();
         }

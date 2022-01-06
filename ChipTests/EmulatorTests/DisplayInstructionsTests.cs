@@ -1,7 +1,11 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,13 +34,19 @@ namespace ChipTests.EmulatorTests
         public async Task GivenDigitDrawingProgramAndValueInRegisterV0_WhenExecuteProgram_ThenProgramShouldDrawSpriteOfAHexDigitFromV0Value(int digit)
         {
             // Given
+            var expectedPixelsToDraw = GetCharacterSpriteToDraw(digit);
+
+            IEnumerable<Pixel> result = null;
+            var renderer = Substitute.For<IRenderer>();
+            await renderer.DrawPixelsAsync(Arg.Do<IEnumerable<Pixel>>(arg => result = arg));
+
             var emulator = new Emulator(Substitute.For<ISound>())
             {
-                Renderer = Substitute.For<IRenderer>()
+                Renderer = renderer
             };
 
-            emulator.LoadProgram(new byte[] 
-            { 
+            emulator.LoadProgram(new byte[]
+            {
                 0xF0, 0x29, // Set index register to sprite address of a digit stored in V0.
                 0xD1, 0x25  // Draw it.
             });
@@ -47,12 +57,26 @@ namespace ChipTests.EmulatorTests
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            var frame = emulator.Display.ReadFrame();
-            CollectionAssert.AreEqual(SpriteBitMaps.HexDigits[digit][0], frame.ElementAt(0).Take(8).ToArray());
-            CollectionAssert.AreEqual(SpriteBitMaps.HexDigits[digit][1], frame.ElementAt(1).Take(8).ToArray());
-            CollectionAssert.AreEqual(SpriteBitMaps.HexDigits[digit][2], frame.ElementAt(2).Take(8).ToArray());
-            CollectionAssert.AreEqual(SpriteBitMaps.HexDigits[digit][3], frame.ElementAt(3).Take(8).ToArray());
-            CollectionAssert.AreEqual(SpriteBitMaps.HexDigits[digit][4], frame.ElementAt(4).Take(8).ToArray());
+            var frame = emulator.Screen;
+            CollectionAssert.AreEqual(expectedPixelsToDraw, result.ToList());
+        }
+
+        private static List<Pixel> GetCharacterSpriteToDraw(int characterDigit)
+        {
+            var pixelsToDraw = new List<Pixel>();
+
+            int offset = characterDigit * CharacterSprites.CharacterSize;
+            var bytes = new ArraySegment<byte>(CharacterSprites.Data, offset, CharacterSprites.CharacterSize).ToArray();
+            for (int y = 0; y < bytes.Length; ++y)
+            {
+                var bits = new BitArray(new[] { bytes[y] }).Cast<bool>().Reverse().ToArray();
+                for (int x = 0; x < bits.Length; ++x)
+                {
+                    pixelsToDraw.Add(new Pixel(x, y, bits[x]));
+                }
+            }
+
+            return pixelsToDraw;
         }
     }
 }

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Chip.Output
+namespace Chip.Display
 {
     public interface IRenderer
     {
-        Task DrawFrameAsync(IEnumerable<IEnumerable<bool>> frame, int width, int height);
+        Task DrawPixelsAsync(IEnumerable<Pixel> pixels);
 
         Task ClearScreenAsync();
     }
