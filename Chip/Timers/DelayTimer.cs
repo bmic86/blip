@@ -8,9 +8,6 @@ namespace Chip.Timers
 {
     internal class DelayTimer
     {
-        private const int TimerFrequencyInHz = 60;
-        private const double MilisecondsPerTick = 1000 / TimerFrequencyInHz;
-
         private DateTime? _lastCheckTime;
         private double _value = 0.0;
 
@@ -30,10 +27,9 @@ namespace Chip.Timers
             }
 
             var now = DateTime.Now;
-            double diffInMs = (now - _lastCheckTime.Value).TotalMilliseconds;
+            double diffInSeconds = (now - _lastCheckTime.Value).TotalSeconds;
 
-            double diffInTicks = diffInMs / MilisecondsPerTick;
-            double result = _value - diffInTicks;
+            double result = _value - TimerConversions.SecondsToTicks(diffInSeconds);
             if (result > 0.0)
             {
                 _value = result;

@@ -4,6 +4,8 @@ namespace Chip.Output
 {
     public interface ISound
     {
-        public Task EmitToneAsync();
+        public Task PlayKeyDownToneAsync();
+
+        public Task PlayToneAsync(double playTimeInSeconds);
     }
 }

@@ -14,6 +14,7 @@ namespace Chip
         private const int InstructionSize = 2;
 
         private readonly IRandomGenerator _randomGenerator;
+        private readonly ISound _sound;
 
         internal Screen Screen { get; private set; } = new();
 
@@ -27,7 +28,7 @@ namespace Chip
 
         public Emulator(ISound sound)
         {
-            _ = sound ?? throw new ArgumentNullException(nameof(sound));
+            _sound = sound ?? throw new ArgumentNullException(nameof(sound));
 
             Keypad = new Keypad(sound);
             _randomGenerator = new RandomGenerator();
@@ -35,7 +36,7 @@ namespace Chip
 
         internal Emulator(ISound sound, IRandomGenerator randomGenerator)
         {
-            _ = sound ?? throw new ArgumentNullException(nameof(sound));
+            _sound = sound ?? throw new ArgumentNullException(nameof(sound));
 
             Keypad = new Keypad(sound);
             _randomGenerator = randomGenerator;
@@ -113,7 +114,7 @@ namespace Chip
                 (0xF000, _, 0x0000, 0x0007) => LoadVxFromDelayTimer(instruction.VXIndex),
                 (0xF000, _, 0x0000, 0x000A) => WaitForKeyPress(instruction.VXIndex),
                 (0xF000, _, 0x0010, 0x0005) => LoadDelayTimerFromVx(instruction.VXIndex),
-                //(0xF000, _, 0x0010, 0x0008) => ,
+                (0xF000, _, 0x0010, 0x0008) => await PlaySoundUsingVxValueAsTimeAsync(instruction.VXIndex),
                 (0xF000, _, 0x0010, 0x000E) => AddVxToIndexRegister(instruction.VXIndex),
                 (0xF000, _, 0x0020, 0x0009) => SetIndexRegisterToCharacterSpriteAddress(instruction.VXIndex),
                 (0xF000, _, 0x0030, 0x0003) => StoreVxAsBinaryCodedDecimal(instruction.VXIndex),
@@ -121,6 +122,12 @@ namespace Chip
                 (0xF000, _, 0x0060, 0x0005) => LoadRegistersInBulk(instruction.VXIndex),
                 _ => throw new ChipProgramExecutionException($"Unrecognized instruction `{instruction}`.")
             };
+        }
+
+        private async Task<ushort> PlaySoundUsingVxValueAsTimeAsync(int x)
+        {
+            await _sound.PlayToneAsync(TimerConversions.TicksToSeconds(State.Registers.V[x]));
+            return GetNextInstructionAddress();
         }
 
         private ushort LoadVxFromDelayTimer(int x)
@@ -148,7 +155,7 @@ namespace Chip
                 wasCollision |= Screen.DrawPixelsOctetFromByte(drawPositionX, drawPositionY, State.Memory[startIndex + i]);
                 ++drawPositionY;
             }
- 
+
             State.Registers.V[0xF] = Convert.ToByte(wasCollision);
 
             await Renderer.DrawPixelsAsync(Screen.ReadPixels(drawPositionX, initialDrawPositionY, 8, n));

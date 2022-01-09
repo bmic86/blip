@@ -17,7 +17,7 @@ namespace Chip.Input
             if (_isInCaptureSingleKeyMode && CapturedKey == null)
             {
                 CapturedKey = key;
-                await _sound.EmitToneAsync();
+                await _sound.PlayKeyDownToneAsync();
             }
         }
 

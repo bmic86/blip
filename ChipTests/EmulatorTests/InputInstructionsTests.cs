@@ -89,7 +89,7 @@ namespace ChipTests.EmulatorTests
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            await soundDevice.DidNotReceive().EmitToneAsync();
+            await soundDevice.DidNotReceive().PlayKeyDownToneAsync();
         }
 
         [TestMethod]
@@ -171,7 +171,7 @@ namespace ChipTests.EmulatorTests
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            await soundDevice.DidNotReceive().EmitToneAsync();
+            await soundDevice.DidNotReceive().PlayKeyDownToneAsync();
         }
 
         [TestMethod]
@@ -237,7 +237,7 @@ namespace ChipTests.EmulatorTests
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            await soundDevice.Received().EmitToneAsync();
+            await soundDevice.Received().PlayKeyDownToneAsync();
         }
 
         [TestMethod]

@@ -19,10 +19,10 @@ export function resume() {
 function startNewOscillator() {
   oscillator = audioCtx.createOscillator();
   oscillator.type = "square";
-  oscillator.frequency.value = 400; //Hz
   oscillator.onended = () => {
     oscillator = null;
   };
   oscillator.connect(audioCtx.destination);
-  oscillator.start();
+  oscillator.frequency.setValueAtTime(400, audioCtx.currentTime) //Hz
+  oscillator.start(audioCtx.currentTime);
 }

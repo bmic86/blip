@@ -22,11 +22,17 @@ namespace Blip.Services
             }
         }
 
-        public async Task EmitToneAsync()
+        public async Task PlayKeyDownToneAsync() => await PlayToneAsync(0.4);
+
+        public async Task PlayToneAsync(double playTimeInSeconds)
         {
             await InitSoundModuleAsync();
+
 #pragma warning disable CS8604 // Possible null reference argument.
-            await _soundModule.InvokeVoidAsync("play", 0.4);
+
+            // InitSoundModuleAsync() call must guarantee, that _soundModule is not null.
+            await _soundModule.InvokeVoidAsync("play", playTimeInSeconds);
+
 #pragma warning restore CS8604 // Possible null reference argument.
         }
 
