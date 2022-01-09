@@ -1,17 +1,41 @@
 ﻿using Chip.Output;
-using Howler.Blazor.Components;
+using Microsoft.JSInterop;
 
 namespace Blip.Services
 {
-    public class SoundService : ISound
+    public class SoundService : ISound, IAsyncDisposable
     {
-        private readonly IHowl _howler;
+        private readonly IJSRuntime _js;
 
-        public SoundService(IHowl howler)
+        private IJSObjectReference? _soundModule;
+
+        public SoundService(IJSRuntime js)
         {
-            _howler = howler ?? throw new ArgumentNullException(nameof(howler));
+            _js = js ?? throw new ArgumentNullException(nameof(js));
         }
 
-        public async Task EmitToneAsync() => await _howler.Play("/sound/tone.wav");
+        private async Task InitSoundModuleAsync()
+        {
+            if (_soundModule == null)
+            {
+                _soundModule = await _js.InvokeAsync<IJSObjectReference>("import", "./js/sound.js");
+            }
+        }
+
+        public async Task EmitToneAsync()
+        {
+            await InitSoundModuleAsync();
+#pragma warning disable CS8604 // Possible null reference argument.
+            await _soundModule.InvokeVoidAsync("play", 0.4);
+#pragma warning restore CS8604 // Possible null reference argument.
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_soundModule != null)
+            {
+                await _soundModule.DisposeAsync();
+            }
+        }
     }
 }
