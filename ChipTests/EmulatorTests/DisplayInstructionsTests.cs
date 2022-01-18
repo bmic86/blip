@@ -15,6 +15,29 @@ namespace ChipTests.EmulatorTests
     public class DisplayInstructionsTests
     {
         [TestMethod]
+        public async Task GivenInstruction00E0AndAllPixelsOnScreenTurnedOn_WhenExecuteInstruction_ThenClearDisplayScreen()
+        {
+            // Given
+            var renderer = Substitute.For<IRenderer>();
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = renderer
+            };
+
+            emulator.LoadProgram(new byte[] { 0x00, 0xE0 });
+            TurnOnAllPixelsOnScreen(emulator);
+
+            // When
+            await emulator.ProcessNextMachineCycleAsync();
+
+            // Then
+            var screenPixels = emulator.Screen.ReadPixels(0, 0, emulator.Screen.Width, emulator.Screen.Height);
+
+            Assert.IsFalse(screenPixels.Any(p => p.Value != false));
+            await renderer.Received().ClearScreenAsync();
+        }
+
+        [TestMethod]
         [DataRow(0x0)]
         [DataRow(0x1)]
         [DataRow(0x2)]
@@ -77,6 +100,17 @@ namespace ChipTests.EmulatorTests
             }
 
             return pixelsToDraw;
+        }
+
+        private static void TurnOnAllPixelsOnScreen(Emulator emulator)
+        {
+            for (int y = 0; y < emulator.Screen.Height; y++)
+            {
+                for (int x = 0; x < emulator.Screen.Width; x += 8)
+                {
+                    emulator.Screen.DrawPixelsOctetFromByte(x, y, 0xFF);
+                }
+            }
         }
     }
 }
