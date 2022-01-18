@@ -1,10 +1,8 @@
 ﻿@page "/"
 @implements IAsyncDisposable
 
-@using Blazor.Extensions
-@using Blazor.Extensions.Canvas.Canvas2D
 @using Blip.Services
-@using Chip;
+@using Chip
 @using Chip.Input
 @using Chip.Output
 
@@ -16,18 +14,15 @@
 
 <InputFile OnChange="@LoadFile" />
 
-<BECanvas @ref="_canvasReference" Width="640" Height="320"></BECanvas>
+<canvas id="screen" width="640" height="320"></canvas>
 
 
 @code {
 
   private DotNetObjectReference<Index>? _mainComponent;
   private IJSObjectReference? _module;
-  private Canvas2DContext? _context;
   private Canvas2DRenderService? _canvas2DRenderService;
   private Timer? _timer;
-
-  protected BECanvasComponent? _canvasReference;
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
@@ -36,8 +31,7 @@
     _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/input-bindings.js");
     await _module.InvokeVoidAsync("registerInputHandlers", _mainComponent);
 
-    _context = await this._canvasReference.CreateCanvas2DAsync();
-    _canvas2DRenderService = _canvas2DRenderService ?? new Canvas2DRenderService(_context);
+    _canvas2DRenderService = _canvas2DRenderService ?? new Canvas2DRenderService(JS);
     ChipEmulator.Renderer = _canvas2DRenderService;
 
     await _canvas2DRenderService.ClearScreenAsync();
@@ -86,6 +80,4 @@
       await _module.DisposeAsync();
     }
   }
-
-
 }

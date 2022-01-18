@@ -1,28 +1,58 @@
-﻿using Blazor.Extensions.Canvas.Canvas2D;
-using Chip.Display;
+﻿using Chip.Display;
 using Chip.Output;
+using Microsoft.JSInterop;
 
 namespace Blip.Services
 {
-    public class Canvas2DRenderService : IRenderer
+    public class Canvas2DRenderService : IRenderer, IAsyncDisposable
     {
-        Canvas2DContext _context;
+        private readonly IJSRuntime _js;
 
-        public Canvas2DRenderService(Canvas2DContext context)
-            => _context = context ?? throw new ArgumentNullException(nameof(context));
+        private IJSObjectReference? _renderModule;
+
+        public Canvas2DRenderService(IJSRuntime js)
+        {
+            _js = js ?? throw new ArgumentNullException(nameof(js));
+        }
+
+        private async Task InitRenderModuleAsync()
+        {
+            if (_renderModule == null)
+            {
+                _renderModule = await _js.InvokeAsync<IJSObjectReference>("import", "./js/canvas-render.js");
+                await _renderModule.InvokeVoidAsync("init", "screen", 64, 32);
+            }
+        }
 
         public async Task ClearScreenAsync()
         {
-            await _context.SetFillStyleAsync("black");
-            await _context.FillRectAsync(0, 0, 640, 320);
+            await InitRenderModuleAsync(); // Must guarantee, that _renderModule is not null.
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            await _renderModule.InvokeVoidAsync("clearFrame");
+            await _renderModule.InvokeVoidAsync("renderFrame");
+#pragma warning restore CS8604 // Possible null reference argument.
         }
 
         public async Task DrawPixelsAsync(IEnumerable<Pixel> pixels)
         {
+            await InitRenderModuleAsync(); // Must guarantee, that _renderModule is not null.
+
+#pragma warning disable CS8604 // Possible null reference argument.
             foreach (var pixel in pixels)
             {
-                await _context.SetFillStyleAsync(pixel.Value ? "white" : "black");
-                await _context.FillRectAsync(pixel.X * 10, pixel.Y * 10, 10, 10);
+                await _renderModule.InvokeVoidAsync("drawPixel", pixel.X, pixel.Y, pixel.Value);
+            }
+
+            await _renderModule.InvokeVoidAsync("renderFrame");
+#pragma warning restore CS8604 // Possible null reference argument.
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if(_renderModule != null)
+            {
+                await _renderModule.DisposeAsync();
             }
         }
     }
