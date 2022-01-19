@@ -18,10 +18,9 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction00E0AndAllPixelsOnScreenTurnedOn_WhenExecuteInstruction_ThenClearDisplayScreen()
         {
             // Given
-            var renderer = Substitute.For<IRenderer>();
             var emulator = new Emulator(Substitute.For<ISound>())
             {
-                Renderer = renderer
+                Renderer = Substitute.For<IRenderer>()
             };
 
             emulator.LoadProgram(new byte[] { 0x00, 0xE0 });
@@ -32,9 +31,74 @@ namespace ChipTests.EmulatorTests
 
             // Then
             var screenPixels = emulator.Screen.ReadPixels(0, 0, emulator.Screen.Width, emulator.Screen.Height);
-
             Assert.IsFalse(screenPixels.Any(p => p.Value != false));
+        }
+
+        [TestMethod]
+        public async Task GivenInstruction00E0_WhenExecuteInstruction_ThenCallCleanScreenRendererMethod()
+        {
+            // Given
+            var renderer = Substitute.For<IRenderer>();
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = renderer
+            };
+
+            emulator.LoadProgram(new byte[] { 0x00, 0xE0 });
+
+            // When
+            await emulator.ProcessNextMachineCycleAsync();
+
+            // Then
             await renderer.Received().ClearScreenAsync();
+        }
+
+        [TestMethod]
+        public async Task GivenInstructionDXYN_WhenExecuteInstruction_ThenIndexRegisterValueShouldNotChange()
+        {
+            // Given
+            const int initialIndexRegisterValue = 16;
+
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+
+            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            emulator.State.Registers.I = initialIndexRegisterValue;
+
+            // When
+            await emulator.ProcessNextMachineCycleAsync();
+
+            // Then
+            Assert.AreEqual(initialIndexRegisterValue, emulator.State.Registers.I);
+        }
+
+        [TestMethod]
+        [DataRow((byte)0, (byte)0)]
+        [DataRow((byte)32, (byte)16)]
+        [DataRow((byte)56, (byte)0)]
+        [DataRow((byte)0, (byte)31)]
+        [DataRow((byte)56, (byte)31)]
+        public async Task GivenInstructionDXYN_WhenExecuteInstruction_ThenDrawSpriteOnProperScreenPosition(byte positionX, byte positionY)
+        {
+            // Given
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+
+            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            emulator.State.Registers.V[0x0] = positionX;
+            emulator.State.Registers.V[0x1] = positionY;
+
+            // When
+            await emulator.ProcessNextMachineCycleAsync();
+
+            // Then
+            var screenPixels = emulator.Screen.ReadPixels(positionX, positionY, 8, 1);
+            CollectionAssert.AreEqual(Enumerable.Range(positionX, 8).ToArray(), screenPixels.Select(pixel => pixel.X).ToArray());
+            CollectionAssert.AreEqual(Enumerable.Repeat<int>(positionY, 8).ToArray(), screenPixels.Select(pixel => pixel.Y).ToArray());
         }
 
         [TestMethod]
@@ -80,7 +144,6 @@ namespace ChipTests.EmulatorTests
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            var frame = emulator.Screen;
             CollectionAssert.AreEqual(expectedPixelsToDraw, result.ToList());
         }
 
