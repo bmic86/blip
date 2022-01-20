@@ -80,6 +80,8 @@ namespace ChipTests.EmulatorTests
         [DataRow((byte)56, (byte)0)]
         [DataRow((byte)0, (byte)31)]
         [DataRow((byte)56, (byte)31)]
+        [DataRow((byte)64, (byte)32)]
+        [DataRow((byte)248, (byte)255)]
         public async Task GivenInstructionDXYN_WhenExecuteInstruction_ThenDrawSpriteOnProperScreenPosition(byte positionX, byte positionY)
         {
             // Given
@@ -92,17 +94,20 @@ namespace ChipTests.EmulatorTests
             emulator.State.Registers.V[0x0] = positionX;
             emulator.State.Registers.V[0x1] = positionY;
 
+            int expectedPositionX = positionX % emulator.Screen.Width;
+            int expectedPositionY = positionY % emulator.Screen.Height;
+
             // When
             await emulator.ProcessNextMachineCycleAsync();
 
             // Then
-            var screenPixels = emulator.Screen.ReadPixels(positionX, positionY, 8, 1);
-            CollectionAssert.AreEqual(Enumerable.Range(positionX, 8).ToArray(), screenPixels.Select(pixel => pixel.X).ToArray());
-            CollectionAssert.AreEqual(Enumerable.Repeat<int>(positionY, 8).ToArray(), screenPixels.Select(pixel => pixel.Y).ToArray());
+            var screenPixels = emulator.Screen.ReadPixels(expectedPositionX, expectedPositionY, 8, 1);
+            CollectionAssert.AreEqual(Enumerable.Range(expectedPositionX, 8).ToArray(), screenPixels.Select(pixel => pixel.X).ToArray());
+            CollectionAssert.AreEqual(Enumerable.Repeat<int>(expectedPositionY, 8).ToArray(), screenPixels.Select(pixel => pixel.Y).ToArray());
         }
 
         [TestMethod]
-        public async Task GivenInstructionDXYNAndEmptyDrawingRegionOnScreen_WhenExecuteInstruction_ThenCollisionFlagIsNotSet()
+        public async Task GivenInstructionDXYNAndEmptyDrawingRegionOnScreen_WhenExecuteInstruction_ThenDoNotSetCollisionFlag()
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>())
@@ -120,7 +125,7 @@ namespace ChipTests.EmulatorTests
         }
 
         [TestMethod]
-        public async Task GivenInstructionDXYNAndNonEmptyDrawingRegionOnScreen_WhenExecuteInstruction_ThenCollisionFlagIsSet()
+        public async Task GivenInstructionDXYNAndNonEmptyDrawingRegionOnScreen_WhenExecuteInstruction_ThenSetCollisionFlag()
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>())
@@ -136,6 +141,36 @@ namespace ChipTests.EmulatorTests
 
             // Then
             Assert.AreEqual(1, emulator.State.Registers.V[0xF]);
+        }
+
+        // "DXYN clips sprites that are partially drawn outside of the display area."
+        // Source: https://chip-8.github.io/extensions/#chip-8
+        [TestMethod]
+        [DataRow((byte)63, (byte)0, 15)]
+        [DataRow((byte)63, (byte)31, 1)]
+        [DataRow((byte)60, (byte)16, 4 * 15)]
+        [DataRow((byte)30, (byte)25, 8 * 7)]
+        public async Task GivenInstructionDXYN_WhenExecuteInstruction_ThenDoNotDrawSpritePartsThatAreOutsideOfAScreen(byte positionX, byte positionY, int expectedPixelsNumToDraw)
+        {
+            // Given
+            IEnumerable<Pixel> result = null;
+            var renderer = Substitute.For<IRenderer>();
+            await renderer.DrawPixelsAsync(Arg.Do<IEnumerable<Pixel>>(arg => result = arg));
+
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = renderer
+            };
+
+            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            emulator.State.Registers.V[0x0] = positionX;
+            emulator.State.Registers.V[0x1] = positionY;
+
+            // When
+            await emulator.ProcessNextMachineCycleAsync();
+
+            // Then
+            Assert.AreEqual(expectedPixelsNumToDraw, result.Count());
         }
 
         [TestMethod]
