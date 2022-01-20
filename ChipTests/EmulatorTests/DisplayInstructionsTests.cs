@@ -102,6 +102,43 @@ namespace ChipTests.EmulatorTests
         }
 
         [TestMethod]
+        public async Task GivenInstructionDXYNAndEmptyDrawingRegionOnScreen_WhenExecuteInstruction_ThenCollisionFlagIsNotSet()
+        {
+            // Given
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+
+            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+
+            // When
+            await emulator.ProcessNextMachineCycleAsync();
+
+            // Then
+            Assert.AreEqual(0, emulator.State.Registers.V[0xF]);
+        }
+
+        [TestMethod]
+        public async Task GivenInstructionDXYNAndNonEmptyDrawingRegionOnScreen_WhenExecuteInstruction_ThenCollisionFlagIsSet()
+        {
+            // Given
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+
+            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            emulator.Screen.DrawPixelsOctetFromByte(0, 0, 0xFF);
+
+            // When
+            await emulator.ProcessNextMachineCycleAsync();
+
+            // Then
+            Assert.AreEqual(1, emulator.State.Registers.V[0xF]);
+        }
+
+        [TestMethod]
         [DataRow(0x0)]
         [DataRow(0x1)]
         [DataRow(0x2)]
