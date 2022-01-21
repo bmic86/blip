@@ -11,7 +11,11 @@ namespace Chip.Timers
         private DateTime? _lastCheckTime;
         private double _value = 0.0;
 
-        internal byte Value => (byte)_value;
+        internal byte Value
+        {
+            get { return (byte)_value; }
+            set { _value = value; }
+        }
 
         internal void Start(byte delayValue)
         {
