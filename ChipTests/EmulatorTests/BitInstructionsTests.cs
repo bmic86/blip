@@ -1,6 +1,7 @@
 ﻿using Chip;
 using Chip.Output;
 using Chip.Random;
+using Chip.Timers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Threading.Tasks;
@@ -191,7 +192,7 @@ namespace ChipTests.EmulatorTests
             var randomGenerator = Substitute.For<IRandomGenerator>();
             randomGenerator.Generate().Returns(randomValue);
 
-            var emulator = new Emulator(Substitute.For<ISound>(), randomGenerator);
+            var emulator = new Emulator(Substitute.For<ISound>(), randomGenerator, Substitute.For<ITimeProvider>());
             emulator.LoadProgram(instruction);
 
             // When

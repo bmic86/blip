@@ -20,7 +20,7 @@ namespace Chip
 
         internal MachineState State { get; private set; } = new();
 
-        internal DelayTimer DelayTimer { get; private set; } = new();
+        internal DelayTimer DelayTimer { get; private set; }
 
         public Keypad Keypad { get; private set; }
 
@@ -32,14 +32,16 @@ namespace Chip
 
             Keypad = new Keypad(sound);
             _randomGenerator = new RandomGenerator();
+            DelayTimer = new DelayTimer();
         }
 
-        internal Emulator(ISound sound, IRandomGenerator randomGenerator)
+        internal Emulator(ISound sound, IRandomGenerator randomGenerator, ITimeProvider timeProvider)
         {
             _sound = sound ?? throw new ArgumentNullException(nameof(sound));
 
             Keypad = new Keypad(sound);
             _randomGenerator = randomGenerator;
+            DelayTimer = new DelayTimer(timeProvider);
         }
 
         public void LoadProgram(byte[] program)
