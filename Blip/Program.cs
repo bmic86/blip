@@ -1,4 +1,7 @@
-﻿using Blip;
+﻿using Blazorise;
+using Blazorise.Bootstrap5;
+using Blazorise.Icons.FontAwesome;
+using Blip;
 using Blip.Services;
 using Chip;
 using Chip.Output;
@@ -10,6 +13,12 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+builder.Services
+    .AddBlazorise(options => { options.ChangeTextOnKeyPress = true; })
+    .AddBootstrap5Providers()
+    .AddFontAwesomeIcons();
+
 builder.Services.AddSingleton<ISound, SoundService>();
 builder.Services.AddSingleton<Emulator>();
 builder.Services.AddSingleton<KeyMappingsService>();
