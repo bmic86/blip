@@ -43,7 +43,7 @@ namespace ChipTests.EmulatorTests
                 Substitute.For<IRandomGenerator>(),
                 timeProvider);
 
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.DelayTimer.Start(expectedValue);
 
             // When
@@ -75,7 +75,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.V[x] = expectedValue;
 
@@ -109,7 +109,7 @@ namespace ChipTests.EmulatorTests
             // Given
             var soundModule = Substitute.For<ISound>();
             var emulator = new Emulator(soundModule);
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.V[x] = expectedValue;
 

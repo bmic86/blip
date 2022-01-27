@@ -12,8 +12,6 @@
 
 <PageTitle>Index</PageTitle>
 
-<InputFile OnChange="@LoadFile" />
-
 <canvas id="screen" width="640" height="320"></canvas>
 
 
@@ -22,7 +20,6 @@
   private DotNetObjectReference<Index>? _mainComponent;
   private IJSObjectReference? _module;
   private Canvas2DRenderService? _canvas2DRenderService;
-  private Timer? _timer;
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
@@ -55,20 +52,6 @@
     {
       await ChipEmulator.Keypad.KeyDownAsync(mappedKey.Value);
     }
-  }
-
-  private async void LoadFile(InputFileChangeEventArgs args)
-  {
-    _timer?.Dispose();
-
-    await using MemoryStream ms = new();
-    await args.File.OpenReadStream().CopyToAsync(ms);
-    ChipEmulator.LoadProgram(ms.ToArray());
-
-    _timer = new Timer(async _ =>
-    {
-      await ChipEmulator.ProcessNextMachineCycleAsync();
-    }, null, 0, 1000 / 500);
   }
 
   async ValueTask IAsyncDisposable.DisposeAsync()

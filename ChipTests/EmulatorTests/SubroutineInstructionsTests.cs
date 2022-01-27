@@ -17,7 +17,7 @@ namespace ChipTests.EmulatorTests
             ushort expectedResult = 0xABC;
 
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Stack.Push(expectedResult);
 
             // When
@@ -37,7 +37,7 @@ namespace ChipTests.EmulatorTests
             ushort nextInstructionAddress = Default.StartAddress + 2;
 
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();

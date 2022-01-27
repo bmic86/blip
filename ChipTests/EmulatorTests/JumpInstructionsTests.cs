@@ -17,7 +17,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -47,7 +47,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -78,7 +78,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -109,7 +109,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -140,7 +140,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -171,7 +171,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -203,7 +203,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -235,7 +235,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -267,7 +267,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -288,7 +288,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[0] = initialRegisterValue;
 
             // When

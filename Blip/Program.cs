@@ -20,6 +20,7 @@ builder.Services
     .AddFontAwesomeIcons();
 
 builder.Services.AddSingleton<ISound, SoundService>();
+builder.Services.AddSingleton<EmulatorService>();
 builder.Services.AddSingleton<Emulator>();
 builder.Services.AddSingleton<KeyMappingsService>();
 

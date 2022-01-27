@@ -18,7 +18,7 @@ namespace ChipTests.EmulatorTests
             var emulator = new Emulator(Substitute.For<ISound>());
 
             // When
-            emulator.LoadProgram(program);
+            emulator.StartProgramAsync(program);
 
             // Then
             CollectionAssert.AreEquivalent(
@@ -33,7 +33,7 @@ namespace ChipTests.EmulatorTests
             byte[] program = null;
 
             // When
-            void action() => new Emulator(Substitute.For<ISound>()).LoadProgram(program);
+            void action() => new Emulator(Substitute.For<ISound>()).StartProgramAsync(program);
 
             // Then
             Assert.ThrowsException<ArgumentNullException>(action);
@@ -46,7 +46,7 @@ namespace ChipTests.EmulatorTests
             byte[] program = new byte[3585];
 
             // When
-            void action() => new Emulator(Substitute.For<ISound>()).LoadProgram(program);
+            void action() => new Emulator(Substitute.For<ISound>()).StartProgramAsync(program);
 
             // Then
             Assert.ThrowsException<InvalidChipProgramException>(action);

@@ -32,7 +32,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -64,7 +64,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -96,7 +96,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -127,7 +127,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
@@ -158,7 +158,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
@@ -193,7 +193,7 @@ namespace ChipTests.EmulatorTests
             randomGenerator.Generate().Returns(randomValue);
 
             var emulator = new Emulator(Substitute.For<ISound>(), randomGenerator, Substitute.For<ITimeProvider>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();

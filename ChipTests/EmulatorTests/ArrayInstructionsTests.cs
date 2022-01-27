@@ -22,7 +22,7 @@ namespace ChipTests.EmulatorTests
             byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.I = initialIndexValue;
             for (int i = 0; i <= x; ++i)
@@ -49,7 +49,7 @@ namespace ChipTests.EmulatorTests
             byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.I = initialIndexValue;
             for (int i = 0; i <= x; ++i)
@@ -88,7 +88,7 @@ namespace ChipTests.EmulatorTests
             const ushort initialIndexValue = 0x300;
 
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialVxValue;
             emulator.State.Registers.I = initialIndexValue;
 

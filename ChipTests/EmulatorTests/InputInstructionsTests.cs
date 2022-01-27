@@ -32,7 +32,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -65,7 +65,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -82,7 +82,7 @@ namespace ChipTests.EmulatorTests
             // Given
             var soundDevice = Substitute.For<ISound>();
             var emulator = new Emulator(soundDevice);
-            emulator.LoadProgram(new byte[] { 0xE0, 0x9E });
+            emulator.StartProgramAsync(new byte[] { 0xE0, 0x9E });
 
             // When
             await emulator.Keypad.KeyDownAsync(Key.Num0);
@@ -114,7 +114,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -147,7 +147,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -164,7 +164,7 @@ namespace ChipTests.EmulatorTests
             // Given
             var soundDevice = Substitute.For<ISound>();
             var emulator = new Emulator(soundDevice);
-            emulator.LoadProgram(new byte[] { 0xE0, 0xA1 });
+            emulator.StartProgramAsync(new byte[] { 0xE0, 0xA1 });
 
             // When
             await emulator.Keypad.KeyDownAsync(Key.Num0);
@@ -179,7 +179,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
+            emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -211,7 +211,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -229,7 +229,7 @@ namespace ChipTests.EmulatorTests
             // Given
             var soundDevice = Substitute.For<ISound>();
             var emulator = new Emulator(soundDevice);
-            emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
+            emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -245,7 +245,7 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(new byte[] { 0xF0, 0x0A });
+            emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
