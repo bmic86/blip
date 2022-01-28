@@ -1,0 +1,37 @@
+﻿@using Blip.Services
+
+@inject GamesLibraryService GamesLibraryService;
+@inject EmulatorService EmulatorService;
+
+<BarMenu>
+  <BarStart>
+    <LoadRomFileBarItem />
+    <BarItem>
+      <BarDropdown>
+        <BarDropdownToggle>
+          <BarIcon IconName="IconName.Book" />
+          Games library
+        </BarDropdownToggle>
+        <BarDropdownMenu>
+          @foreach(var gameName in GamesLibraryService.GameNames)
+          {
+            <BarDropdownItem @onclick="() => OnGameSelected(gameName)">@gameName</BarDropdownItem>
+            @if (gameName != GamesLibraryService.GameNames.Last())
+            {
+              <BarDropdownDivider />
+            }
+          }
+        </BarDropdownMenu>
+      </BarDropdown>
+    </BarItem>
+  </BarStart>
+</BarMenu>
+
+@code {
+
+  private async Task OnGameSelected(string gameName)
+  {
+    byte[] gameContent = await GamesLibraryService.DownloadGameAsync(gameName);
+    await EmulatorService.StartNewProgramAsync(gameContent);
+  }
+}

@@ -28,6 +28,13 @@ namespace Blip.Services
             StartNewTimer();
         }
 
+        public async Task StartNewProgramAsync(byte[] program)
+        {
+            _timer?.Dispose();
+            await _chipEmulator.StartProgramAsync(program);
+            StartNewTimer();
+        }
+
         private void StartNewTimer()
         {
             _timer = new Timer(

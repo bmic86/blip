@@ -24,4 +24,6 @@ builder.Services.AddSingleton<EmulatorService>();
 builder.Services.AddSingleton<Emulator>();
 builder.Services.AddSingleton<KeyMappingsService>();
 
+builder.Services.AddScoped<GamesLibraryService>();
+
 await builder.Build().RunAsync();
