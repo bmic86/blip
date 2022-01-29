@@ -1,9 +1,11 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Exceptions;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System;
+using System.Threading.Tasks;
 
 namespace ChipTests.EmulatorTests
 {
@@ -11,14 +13,17 @@ namespace ChipTests.EmulatorTests
     public class ProgramLoadTests
     {
         [TestMethod]
-        public void GivenNonNullProgram_WhenTryingToLoadIt_ThenShouldLoadProgramProperly()
+        public async Task GivenNonNullProgram_WhenTryingToLoadIt_ThenShouldLoadProgramProperly()
         {
             // Given
             var program = new byte[] { 0x00, 0xE0 };
-            var emulator = new Emulator(Substitute.For<ISound>());
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
 
             // When
-            emulator.StartProgramAsync(program);
+            await emulator.StartProgramAsync(program);
 
             // Then
             CollectionAssert.AreEquivalent(
@@ -31,12 +36,16 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             byte[] program = null;
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
 
             // When
-            void action() => new Emulator(Substitute.For<ISound>()).StartProgramAsync(program);
+            async Task action() => await emulator.StartProgramAsync(program);
 
             // Then
-            Assert.ThrowsException<ArgumentNullException>(action);
+            Assert.ThrowsExceptionAsync<ArgumentNullException>(action);
         }
 
         [TestMethod]
@@ -44,12 +53,16 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             byte[] program = new byte[3585];
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
 
             // When
-            void action() => new Emulator(Substitute.For<ISound>()).StartProgramAsync(program);
+            async Task action() => await emulator.StartProgramAsync(program);
 
             // Then
-            Assert.ThrowsException<InvalidChipProgramException>(action);
+            Assert.ThrowsExceptionAsync<InvalidChipProgramException>(action);
         }
     }
 }

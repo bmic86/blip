@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -21,8 +22,11 @@ namespace ChipTests.EmulatorTests
             int valuesCount = x + 1;
             byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.I = initialIndexValue;
             for (int i = 0; i <= x; ++i)
@@ -48,8 +52,11 @@ namespace ChipTests.EmulatorTests
             int valuesCount = x + 1;
             byte[] expectedRegisterValues = Enumerable.Range(123, valuesCount).Select(value => (byte)value).ToArray();
 
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.I = initialIndexValue;
             for (int i = 0; i <= x; ++i)
@@ -87,8 +94,11 @@ namespace ChipTests.EmulatorTests
             // Given
             const ushort initialIndexValue = 0x300;
 
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialVxValue;
             emulator.State.Registers.I = initialIndexValue;
 

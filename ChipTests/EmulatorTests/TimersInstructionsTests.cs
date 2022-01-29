@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Chip.Random;
 using Chip.Timers;
@@ -41,9 +42,12 @@ namespace ChipTests.EmulatorTests
 
             var emulator = new Emulator(Substitute.For<ISound>(),
                 Substitute.For<IRandomGenerator>(),
-                timeProvider);
+                timeProvider)
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
 
-            emulator.StartProgramAsync(instruction);
+            await emulator.StartProgramAsync(instruction);
             emulator.DelayTimer.Start(expectedValue);
 
             // When
@@ -74,8 +78,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionFX15_WhenExecuteInstruction_ThenSetDelayTimerToValueOfRegisterVX(byte[] instruction, int x, byte expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.V[x] = expectedValue;
 
@@ -108,8 +115,11 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var soundModule = Substitute.For<ISound>();
-            var emulator = new Emulator(soundModule);
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(soundModule)
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             emulator.State.Registers.V[x] = expectedValue;
 

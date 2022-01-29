@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -16,8 +17,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction1NNN_WhenExecuteInstruction_ThenProgramShouldJumpToAddressNNN(byte[] instruction, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -46,8 +50,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction3XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -77,8 +84,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction3XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -108,8 +118,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction4XNNAndValueOfRegisterVXNotEqualsToNN_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -139,8 +152,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction4XNNAndValueOfRegisterVXEqualsToNN_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte value)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = value;
 
             // When
@@ -170,8 +186,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction5XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -202,8 +221,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction5XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -234,8 +256,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction9XY0AndValueOfRegisterVXNotEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -266,8 +291,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction9XY0AndValueOfRegisterVXEqualsToValueOfRegisterVY_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, int y, byte vxValue, byte vyValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             emulator.State.Registers.V[y] = vyValue;
 
@@ -287,8 +315,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionBNNN_WhenExecuteInstruction_ThenShouldJumpToAddressWhichIsSumOfNNNAndValueOfRegisterV0(byte[] instruction, byte initialRegisterValue, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[0] = initialRegisterValue;
 
             // When

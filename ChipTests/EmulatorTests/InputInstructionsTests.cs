@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Input;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -31,8 +32,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionEX9EAndLeastSignificantDigitOfVXEqualToPressedKey_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -64,8 +68,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionEX9EAndLeastSignificantDigitOfVXNotEqualToPressedKey_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -81,8 +88,11 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var soundDevice = Substitute.For<ISound>();
-            var emulator = new Emulator(soundDevice);
-            emulator.StartProgramAsync(new byte[] { 0xE0, 0x9E });
+            var emulator = new Emulator(soundDevice)
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(new byte[] { 0xE0, 0x9E });
 
             // When
             await emulator.Keypad.KeyDownAsync(Key.Num0);
@@ -113,8 +123,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionEXA1AndLeastSignificantDigitOfVXNotEqualToPressedKey_WhenExecuteInstruction_ThenSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -146,8 +159,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionEXA1AndLeastSignificantDigitOfVXEqualToPressedKey_WhenExecuteInstruction_ThenDoNotSkipNextInstruction(byte[] instruction, int x, byte vxValue, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = vxValue;
             await emulator.Keypad.KeyDownAsync(key);
 
@@ -163,8 +179,11 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var soundDevice = Substitute.For<ISound>();
-            var emulator = new Emulator(soundDevice);
-            emulator.StartProgramAsync(new byte[] { 0xE0, 0xA1 });
+            var emulator = new Emulator(soundDevice)
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(new byte[] { 0xE0, 0xA1 });
 
             // When
             await emulator.Keypad.KeyDownAsync(Key.Num0);
@@ -178,8 +197,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionFX0A_WhenProcessingMultipleMachineCyclesAndKeyIsNotPressed_ThenDoNotProceedToNextInstruction()
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -210,8 +232,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionFX0A_WhenExecuteInstructionAndKeyIsPressed_ThenSetVXRegisterToThePressedKeyValueAndDoNotProceedToNextInstruction(byte[] instruction, int x, Key key)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -228,8 +253,11 @@ namespace ChipTests.EmulatorTests
         {
             // Given
             var soundDevice = Substitute.For<ISound>();
-            var emulator = new Emulator(soundDevice);
-            emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
+            var emulator = new Emulator(soundDevice)
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -244,8 +272,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionFX0A_WhenExecuteInstructionAndPressedKeyIsReleased_ThenProceedToNextInstruction()
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(new byte[] { 0xF0, 0x0A });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();

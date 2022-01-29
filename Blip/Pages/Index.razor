@@ -10,9 +10,9 @@
 @inject Emulator ChipEmulator
 @inject KeyMappingsService KeyMappingsService;
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Blip</PageTitle>
 
-<canvas id="screen" width="640" height="320"></canvas>
+<canvas id="screen"/>
 
 
 @code {
@@ -23,15 +23,18 @@
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    _mainComponent = DotNetObjectReference.Create(this);
+    if (firstRender)
+    {
+      _mainComponent = DotNetObjectReference.Create(this);
 
-    _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/input-bindings.js");
-    await _module.InvokeVoidAsync("registerInputHandlers", _mainComponent);
+      _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/input-bindings.js");
+      await _module.InvokeVoidAsync("registerInputHandlers", _mainComponent);
 
-    _canvas2DRenderService = _canvas2DRenderService ?? new Canvas2DRenderService(JS);
-    ChipEmulator.Renderer = _canvas2DRenderService;
+      _canvas2DRenderService = _canvas2DRenderService ?? new Canvas2DRenderService(JS);
+      ChipEmulator.Renderer = _canvas2DRenderService;
 
-    await _canvas2DRenderService.ClearScreenAsync();
+      await _canvas2DRenderService.ClearScreenAsync();
+    }
   }
 
   [JSInvokable]

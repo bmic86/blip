@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Chip.Random;
 using Chip.Timers;
@@ -31,8 +32,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY1_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -63,8 +67,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY2_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXAndVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -95,8 +102,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY3_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXExclusiveOrVY(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -126,8 +136,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY6_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedRightInVXAndStoreLeastSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
@@ -157,8 +170,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XYE_WhenExecuteInstruction_ThenStoreVYWithBitsShiftedLeftInVXAndStoreMostSignificantBitOfVYInVF(byte[] instruction, int x, int y, byte initialRegisterYValue, byte expectedXValue, byte expectedVFValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
             // When
@@ -192,8 +208,11 @@ namespace ChipTests.EmulatorTests
             var randomGenerator = Substitute.For<IRandomGenerator>();
             randomGenerator.Generate().Returns(randomValue);
 
-            var emulator = new Emulator(Substitute.For<ISound>(), randomGenerator, Substitute.For<ITimeProvider>());
-            emulator.StartProgramAsync(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>(), randomGenerator, Substitute.For<ITimeProvider>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
