@@ -1,14 +1,50 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
+<Layout Sider="true" Background="Background.Dark">
+  <LayoutSider>
+    <LayoutSiderContent>
+      <Bar Mode="BarMode.VerticalInline"
+           CollapseMode="BarCollapseMode.Small"
+           Breakpoint="Breakpoint.Desktop"
+           NavigationBreakpoint="Breakpoint.Tablet"
+           ThemeContrast="ThemeContrast.Dark"
+           Background="Background.Dark"
+           @ref="@sidebar">
+         <BarBrand>
+          <BarItem>
+            <BarLink To="#">
+              Blip
+            </BarLink>
+          </BarItem>
+        </BarBrand>
+        <SideBarMenu/>
+      </Bar>
+    </LayoutSiderContent>
 
-  <main>
-    <div class="top-row px-4">
-      <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-    </div>
+  </LayoutSider>
+  <Layout>
+    <Layout>
+      <LayoutHeader Fixed="true">
+        <Bar Breakpoint="Breakpoint.Desktop"
+             ThemeContrast="ThemeContrast.Dark">
+          <BarToggler Bar="@sidebar" Border="Border.Dark"/>
+          <BarMenu>
+            <BarStart>
+            </BarStart>
+            <BarEnd>
+            </BarEnd>
+          </BarMenu>
+        </Bar>
+      </LayoutHeader>
+    </Layout>
+    <Layout>
+      <LayoutContent>
+        @Body
+      </LayoutContent>
+    </Layout>
+  </Layout>
+</Layout>
 
-    <article class="content px-4">
-      @Body
-    </article>
-  </main>
-</div>
+@code {
+  private Bar? sidebar;
+}

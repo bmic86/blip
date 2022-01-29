@@ -1,0 +1,16 @@
+﻿@using Blip.Services
+
+@inject EmulatorService EmulatorService;
+
+<BarItem>
+  <InputFile id="fileInput" style="display:none;" OnChange="@LoadFileAsync" />
+  <label class="b-bar-link" for="fileInput">
+    <BarIcon IconName="IconName.FileUpload" />
+    Load ROM file
+  </label>
+</BarItem>
+
+@code {
+    private async Task LoadFileAsync(InputFileChangeEventArgs args) 
+      => await EmulatorService.StartNewProgramAsync(args.File);
+}

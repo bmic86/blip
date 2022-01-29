@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -29,8 +30,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction7XNN_WhenExecuteInstruction_ThenAddNNToRegisterVX(byte[] instruction, int x, byte initialRegisterValue, byte expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterValue;
 
             // When
@@ -59,8 +63,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesLessOrEqual255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -91,8 +98,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY4AndRegistersVXAndVYWithSumOfValuesGreaterThan255_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsToVXPlusVYAndCarryIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -123,8 +133,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY5AndRegisterValueVXGreaterOrEqualVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -155,8 +168,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY5AndRegisterValuesVYGreaterThanVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVXMinusVYAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -187,8 +203,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY7AndRegisterValueVYGreaterOrEqualVX_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToOneOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -219,8 +238,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY7AndRegisterValuesVXGreaterThanVY_WhenExecuteInstruction_ThenValueOfRegisterVXEqualsVYMinusVXAndNotBorrowIsSetToZeroOnVF(byte[] instruction, int x, int y, byte initialRegisterXValue, byte initialRegisterYValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialRegisterXValue;
             emulator.State.Registers.V[y] = initialRegisterYValue;
 
@@ -252,8 +274,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionFX1E_WhenExecuteInstruction_ThenSumIndexRegisterWithVX(byte[] instruction, byte x, ushort initialIndexValue, byte initialVxValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.I = initialIndexValue;
             emulator.State.Registers.V[x] = initialVxValue;
 

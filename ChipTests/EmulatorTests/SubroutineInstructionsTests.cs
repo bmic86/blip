@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -16,8 +17,11 @@ namespace ChipTests.EmulatorTests
             byte[] instruction = { 0x00, 0xEE };
             ushort expectedResult = 0xABC;
 
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Stack.Push(expectedResult);
 
             // When
@@ -36,8 +40,11 @@ namespace ChipTests.EmulatorTests
             ushort addressToJump = 0xFFF;
             ushort nextInstructionAddress = Default.StartAddress + 2;
 
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();

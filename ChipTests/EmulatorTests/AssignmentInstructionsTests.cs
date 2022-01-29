@@ -1,4 +1,5 @@
 ﻿using Chip;
+using Chip.Display;
 using Chip.Output;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -29,8 +30,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction6XNN_WhenExecuteInstruction_ThenLoadNNToRegisterVX(byte[] instruction, int x, byte expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -59,8 +63,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstruction8XY0_WhenExecuteInstruction_ThenLoadValueOfRegisterVYIntoRegisterVX(byte[] instruction, int x, int y, byte initialRegisterValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[y] = initialRegisterValue;
 
             // When
@@ -77,8 +84,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionANNN_WhenExecuteInstruction_ThenStoreAddressNNNInIndexRegister(byte[] instruction, ushort expectedResult)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -108,8 +118,11 @@ namespace ChipTests.EmulatorTests
         public async Task GivenInstructionFX29_WhenExecuteInstruction_ThenSetIndexRegisterToCharacterSpriteAddressOfLowestSignificantDigitInVXValue(byte[] instruction, byte x, byte initialVxValue, ushort expectedValue)
         {
             // Given
-            var emulator = new Emulator(Substitute.For<ISound>());
-            emulator.LoadProgram(instruction);
+            var emulator = new Emulator(Substitute.For<ISound>())
+            {
+                Renderer = Substitute.For<IRenderer>()
+            };
+            await emulator.StartProgramAsync(instruction);
             emulator.State.Registers.V[x] = initialVxValue;
 
             // When

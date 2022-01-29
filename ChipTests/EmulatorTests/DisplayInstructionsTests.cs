@@ -23,7 +23,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = Substitute.For<IRenderer>()
             };
 
-            emulator.LoadProgram(new byte[] { 0x00, 0xE0 });
+            await emulator.StartProgramAsync(new byte[] { 0x00, 0xE0 });
             TurnOnAllPixelsOnScreen(emulator);
 
             // When
@@ -44,7 +44,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = renderer
             };
 
-            emulator.LoadProgram(new byte[] { 0x00, 0xE0 });
+            await emulator.StartProgramAsync(new byte[] { 0x00, 0xE0 });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -64,7 +64,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = Substitute.For<IRenderer>()
             };
 
-            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            await emulator.StartProgramAsync(new byte[] { 0xD0, 0x1F });
             emulator.State.Registers.I = initialIndexRegisterValue;
 
             // When
@@ -90,7 +90,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = Substitute.For<IRenderer>()
             };
 
-            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            await emulator.StartProgramAsync(new byte[] { 0xD0, 0x1F });
             emulator.State.Registers.V[0x0] = positionX;
             emulator.State.Registers.V[0x1] = positionY;
 
@@ -115,7 +115,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = Substitute.For<IRenderer>()
             };
 
-            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            await emulator.StartProgramAsync(new byte[] { 0xD0, 0x1F });
 
             // When
             await emulator.ProcessNextMachineCycleAsync();
@@ -133,7 +133,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = Substitute.For<IRenderer>()
             };
 
-            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            await emulator.StartProgramAsync(new byte[] { 0xD0, 0x1F });
             emulator.Screen.DrawPixelsOctetFromByte(0, 0, 0xFF);
 
             // When
@@ -162,7 +162,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = renderer
             };
 
-            emulator.LoadProgram(new byte[] { 0xD0, 0x1F });
+            await emulator.StartProgramAsync(new byte[] { 0xD0, 0x1F });
             emulator.State.Registers.V[0x0] = positionX;
             emulator.State.Registers.V[0x1] = positionY;
 
@@ -204,7 +204,7 @@ namespace ChipTests.EmulatorTests
                 Renderer = renderer
             };
 
-            emulator.LoadProgram(new byte[]
+            await emulator.StartProgramAsync(new byte[]
             {
                 0xF0, 0x29, // Set index register to sprite address of a digit stored in V0.
                 0xD1, 0x25  // Draw it.

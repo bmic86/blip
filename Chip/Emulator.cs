@@ -44,7 +44,7 @@ namespace Chip
             DelayTimer = new DelayTimer(timeProvider);
         }
 
-        public void LoadProgram(byte[] program)
+        public async Task StartProgramAsync(byte[] program)
         {
             _ = program ?? throw new ArgumentNullException(nameof(program));
 
@@ -57,7 +57,7 @@ namespace Chip
             State.Registers.ClearAll();
             State.Registers.PC = Default.StartAddress;
             InitializeMemory(program);
-            Screen.Clear();
+            await ClearScreenImplAsync();
         }
 
         public async Task ProcessNextMachineCycleAsync()
@@ -166,9 +166,14 @@ namespace Chip
 
         private async Task<ushort> ClearScreenAsync()
         {
+            await ClearScreenImplAsync();
+            return GetNextInstructionAddress();
+        }
+
+        private async Task ClearScreenImplAsync()
+        {
             Screen.Clear();
             await Renderer.ClearScreenAsync();
-            return GetNextInstructionAddress();
         }
 
         private ushort WaitForKeyPress(int x)

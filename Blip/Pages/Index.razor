@@ -10,11 +10,9 @@
 @inject Emulator ChipEmulator
 @inject KeyMappingsService KeyMappingsService;
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Chip-8 Emulator</PageTitle>
 
-<InputFile OnChange="@LoadFile" />
-
-<canvas id="screen" width="640" height="320"></canvas>
+<canvas id="screen"/>
 
 
 @code {
@@ -22,19 +20,21 @@
   private DotNetObjectReference<Index>? _mainComponent;
   private IJSObjectReference? _module;
   private Canvas2DRenderService? _canvas2DRenderService;
-  private Timer? _timer;
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    _mainComponent = DotNetObjectReference.Create(this);
+    if (firstRender)
+    {
+      _mainComponent = DotNetObjectReference.Create(this);
 
-    _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/input-bindings.js");
-    await _module.InvokeVoidAsync("registerInputHandlers", _mainComponent);
+      _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/input-bindings.js");
+      await _module.InvokeVoidAsync("registerInputHandlers", _mainComponent);
 
-    _canvas2DRenderService = _canvas2DRenderService ?? new Canvas2DRenderService(JS);
-    ChipEmulator.Renderer = _canvas2DRenderService;
+      _canvas2DRenderService = _canvas2DRenderService ?? new Canvas2DRenderService(JS);
+      ChipEmulator.Renderer = _canvas2DRenderService;
 
-    await _canvas2DRenderService.ClearScreenAsync();
+      await _canvas2DRenderService.ClearScreenAsync();
+    }
   }
 
   [JSInvokable]
@@ -55,20 +55,6 @@
     {
       await ChipEmulator.Keypad.KeyDownAsync(mappedKey.Value);
     }
-  }
-
-  private async void LoadFile(InputFileChangeEventArgs args)
-  {
-    _timer?.Dispose();
-
-    await using MemoryStream ms = new();
-    await args.File.OpenReadStream().CopyToAsync(ms);
-    ChipEmulator.LoadProgram(ms.ToArray());
-
-    _timer = new Timer(async _ =>
-    {
-      await ChipEmulator.ProcessNextMachineCycleAsync();
-    }, null, 0, 1000 / 500);
   }
 
   async ValueTask IAsyncDisposable.DisposeAsync()
