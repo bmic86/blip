@@ -46,9 +46,14 @@ namespace Chip.Timers
             }
             else
             {
-                _value = 0.0;
-                _lastCheckTime = null;
+                Clear();
             }
+        }
+
+        internal void Clear()
+        {
+            _value = 0.0;
+            _lastCheckTime = null;
         }
     }
 }
