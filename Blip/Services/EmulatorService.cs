@@ -1,13 +1,14 @@
-﻿using Chip;
+﻿using Blip.Models;
+using Chip;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Blip.Services
 {
     public class EmulatorService : IDisposable
     {
-        private const int FrequencyInHz = 500;
-
         private readonly Emulator _chipEmulator;
+
+        private int _timerIntervalInMs = (int)ExecutionSpeed.Medium;
         private Timer? _timer;
 
         public EmulatorService(Emulator chipEmulator)
@@ -35,16 +36,20 @@ namespace Blip.Services
             StartNewTimer();
         }
 
+        public void ChangeExecutionSpeed(ExecutionSpeed speed)
+        {
+            _timerIntervalInMs = (int)speed;
+            _timer?.Change(0, _timerIntervalInMs);
+        }
+
         private void StartNewTimer()
         {
             _timer = new Timer(
                 async _ => await _chipEmulator.ProcessNextMachineCycleAsync(),
                 null,
                 0,
-                GetTimerIntervalInMs());
+                _timerIntervalInMs);
         }
-
-        private int GetTimerIntervalInMs() => 1000 / FrequencyInHz;
 
         public void Dispose() => _timer?.Dispose();
     }

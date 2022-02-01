@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using Blip.Shared.Side
+@using Blip.Shared.Top
+@inherits LayoutComponentBase
 
 <Layout Sider="true" Background="Background.Dark">
   <LayoutSider>
@@ -17,7 +19,7 @@
             </BarLink>
           </BarItem>
         </BarBrand>
-        <SideBarMenu/>
+        <SideBarMenu />
       </Bar>
     </LayoutSiderContent>
 
@@ -27,13 +29,8 @@
       <LayoutHeader Fixed="true">
         <Bar Breakpoint="Breakpoint.Desktop"
              ThemeContrast="ThemeContrast.Dark">
-          <BarToggler Bar="@sidebar" Border="Border.Dark"/>
-          <BarMenu>
-            <BarStart>
-            </BarStart>
-            <BarEnd>
-            </BarEnd>
-          </BarMenu>
+          <BarToggler Bar="@sidebar" Border="Border.Dark" />
+          <TopBarMenu />
         </Bar>
       </LayoutHeader>
     </Layout>

@@ -1,0 +1,32 @@
+﻿@using Blip.Models
+@using Blip.Services
+
+@inject GamesLibraryService GamesLibraryService;
+@inject EmulatorService EmulatorService;
+
+<BarItem>
+  <BarDropdown>
+    <BarDropdownToggle>
+      <BarIcon IconName="IconName.Running" />
+      Speed
+    </BarDropdownToggle>
+    <BarDropdownMenu>
+      @foreach (var speed in speeds)
+      {
+        <BarDropdownItem @onclick="() => ChangeExecutionSpeed(speed)">@speed.ToString().Replace('_', ' ')</BarDropdownItem>
+        @if (speed != speeds.Last())
+        {
+          <BarDropdownDivider />
+        }
+      }
+    </BarDropdownMenu>
+  </BarDropdown>
+</BarItem>
+
+@code {
+
+  private ExecutionSpeed[] speeds = Enum.GetValues<ExecutionSpeed>();
+
+  private void ChangeExecutionSpeed(ExecutionSpeed speed)
+    => EmulatorService.ChangeExecutionSpeed(speed);
+}
