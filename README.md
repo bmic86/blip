@@ -1,8 +1,8 @@
 # Blip
 
-Chip-8 emulator/interpreter written in C# and Blazor. It is running fully on web browser using WebAssembly.
+Chip-8 emulator/interpreter written in C# and Blazor. It is running fully in web browser using WebAssembly.
 
-Implementation is based on classic COSMAC VIP Chip-8 interpeter specification found on the internet.
+Implementation is based on classic COSMAC VIP Chip-8 interpreter specification found on the internet.
 
 ## Key mappings
 
