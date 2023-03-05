@@ -6,13 +6,13 @@
   <LayoutSider>
     <LayoutSiderContent>
       <Bar Mode="BarMode.VerticalInline"
-           CollapseMode="BarCollapseMode.Small"
+           CollapseMode="BarCollapseMode.Hide"
            Breakpoint="Breakpoint.Desktop"
            NavigationBreakpoint="Breakpoint.Tablet"
            ThemeContrast="ThemeContrast.Dark"
            Background="Background.Dark"
            @ref="@sidebar">
-         <BarBrand>
+        <BarBrand>
           <BarItem>
             <BarLink To="#">
               Blip
@@ -22,18 +22,15 @@
         <SideBarMenu />
       </Bar>
     </LayoutSiderContent>
-
   </LayoutSider>
   <Layout>
-    <Layout>
-      <LayoutHeader Fixed="true">
-        <Bar Breakpoint="Breakpoint.Desktop"
-             ThemeContrast="ThemeContrast.Dark">
-          <BarToggler Bar="@sidebar" Border="Border.Dark" />
-          <TopBarMenu />
-        </Bar>
-      </LayoutHeader>
-    </Layout>
+    <LayoutHeader Fixed="true">
+      <Bar Breakpoint="Breakpoint.Desktop"
+           ThemeContrast="ThemeContrast.Dark">
+        <BarToggler Bar="@sidebar" Border="Border.Dark" />
+        <TopBarMenu />
+      </Bar>
+    </LayoutHeader>
     <Layout>
       <LayoutContent>
         @Body
