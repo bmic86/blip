@@ -12,12 +12,6 @@ a, .btn-link {
   color: #0071c1;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
 .content {
   padding-top: 1.1rem;
 }
@@ -62,3 +56,31 @@ a, .btn-link {
   .blazor-error-boundary::after {
     content: "An error has occurred."
   }
+
+.keypad-btn, .keypad-btn:hover {
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+  .keypad-btn:focus {
+    background-color: #1b6ec2;
+    box-shadow: none;
+  }
+
+  .keypad-btn:active {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    box-shadow: 0 0 0 0.25rem rgb(49 132 253 / 50%);
+  }
+
+.keypad {
+  width: 50%;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.keypad-container {
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+}

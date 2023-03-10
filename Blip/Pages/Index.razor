@@ -5,6 +5,7 @@
 @using Chip
 @using Chip.Input
 @using Chip.Output
+@using Blip.Pages.Components;
 
 @inject IJSRuntime JS
 @inject Emulator ChipEmulator
@@ -12,8 +13,11 @@
 
 <PageTitle>Chip-8 Emulator</PageTitle>
 
-<canvas id="screen"/>
+<canvas id="screen" />
 
+<Container Fluid Class="keypad-container">
+  <VisualKeypad />
+</Container>
 
 @code {
 
