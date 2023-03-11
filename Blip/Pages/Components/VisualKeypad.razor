@@ -1,0 +1,39 @@
+﻿@using Chip;
+@using Chip.Input;
+
+@inject Emulator ChipEmulator;
+
+@code {
+  private readonly List<List<Key>> _keys = new()
+  {
+    new() { Key.Num1, Key.Num2, Key.Num3, Key.C, },
+    new() { Key.Num4, Key.Num5, Key.Num6, Key.D, },
+    new() { Key.Num7, Key.Num8, Key.Num9, Key.E, },
+    new() { Key.A, Key.Num0, Key.B, Key.F, },
+  };
+}
+
+<Container Fluid Class="keypad">
+  @foreach (var keys in _keys)
+  {
+    <Row>
+      <Buttons>
+        @foreach (var key in keys)
+        {
+          <button type="button" class="btn btn-primary keypad-btn"
+              @onmousedown="async () => await ChipEmulator.Keypad.KeyDownAsync(key)"
+              @onmouseup="() => ChipEmulator.Keypad.KeyUp(key)"
+              @ontouchstart="async () => await ChipEmulator.Keypad.KeyDownAsync(key)"
+              @ontouchstart:preventDefault="true"
+              @ontouchend="() => ChipEmulator.Keypad.KeyUp(key)"
+              @ontouchend:preventDefault="true"
+              @ontouchcancel="() => ChipEmulator.Keypad.KeyUp(key)"
+              @ontouchcancel:preventDefault="true">
+            @(key.ToString().Last())
+          </button>
+        }
+      </Buttons>
+    </Row>
+  }
+</Container>
+
