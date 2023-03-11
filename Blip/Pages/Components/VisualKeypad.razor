@@ -20,11 +20,17 @@
       <Buttons>
         @foreach (var key in keys)
         {
-          <Button Color="Color.Primary" Class="keypad-btn"
+          <button type="button" class="btn btn-primary keypad-btn"
               @onmousedown="async () => await ChipEmulator.Keypad.KeyDownAsync(key)"
-              @onmouseup="() => ChipEmulator.Keypad.KeyUp(key)">
+              @onmouseup="() => ChipEmulator.Keypad.KeyUp(key)"
+              @ontouchstart="async () => await ChipEmulator.Keypad.KeyDownAsync(key)"
+              @ontouchstart:preventDefault="true"
+              @ontouchend="() => ChipEmulator.Keypad.KeyUp(key)"
+              @ontouchend:preventDefault="true"
+              @ontouchcancel="() => ChipEmulator.Keypad.KeyUp(key)"
+              @ontouchcancel:preventDefault="true">
             @(key.ToString().Last())
-          </Button>
+          </button>
         }
       </Buttons>
     </Row>
